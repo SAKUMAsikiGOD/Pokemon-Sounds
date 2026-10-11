@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ポケモン種族値チェッカー (超高速API版 & サウンド対応)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter & Noto Sans JP Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Custom JS -->
+    <script src="script.js" defer></script>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col">
+
+    <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center border-4 border-white shadow-md">
+                    <i class="fa-solid fa-bolt text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-black tracking-wider flex items-center gap-2">
+                        <span>PokéStats JP</span>
+                        <span class="text-xs bg-gradient-to-r from-red-600 to-purple-600 text-white px-2.5 py-0.5 rounded-full font-bold shadow-xs">メガシンカ・リージョン全1350+種対応</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">PokeAPIからメガシンカ・アローラ・ガラル・ヒスイ・パルデアの種族値も自動取得</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                <button onclick="playMewMelodyDirectly()" class="px-3 py-1.5 bg-pink-600 hover:bg-pink-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer" title="いつでもミュウの種族値の音を聴く">
+                    <i class="fa-solid fa-cat text-pink-200"></i>
+                    <span>ミュウの音を聴く</span>
+                </button>
+                <div class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-2">
+                    <i class="fa-solid fa-database text-red-400"></i>
+                    <span>読込済み: <strong id="loaded-count" class="text-white">0</strong> / <span id="total-target-count">1351</span> 匹</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="loading-banner" class="bg-gradient-to-r from-red-600 via-purple-600 to-indigo-600 text-white px-4 py-2 text-center text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-inner">
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        <span id="loading-text">PokeAPIから全ポケモン（メガシンカ・アローラ等含む）のデータを取得中...</span>
+        <div class="w-32 bg-slate-900/40 h-2 rounded-full overflow-hidden ml-4 hidden sm:block">
+            <div id="loading-progress" class="bg-white h-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
+        
+        <!-- Search & Filters Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Search input -->
+                <div class="relative md:col-span-2">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="search-input" placeholder="ポケモン名、図鑑番号、フォルム（例: ピカチュウ, メガリザードン, アローラ, 25）..." 
+                        class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white text-sm transition-all shadow-inner">
+                </div>
+                <!-- Sort Dropdown & Random Button -->
+                <div class="flex gap-2">
+                    <select id="sort-select" class="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 text-sm font-medium">
+                        <option value="id-asc">図鑑番号順 (昇順)</option>
+                        <option value="id-desc">図鑑番号順 (降順)</option>
+                        <option value="total-desc">種族値合計が高い順</option>
+                        <option value="total-asc">種族値合計が低い順</option>
+                        <option value="hp-desc">HPが高い順</option>
+                        <option value="atk-desc">こうげきが高い順</option>
+                        <option value="def-desc">ぼうぎょが高い順</option>
+                        <option value="spa-desc">とくこうが高い順</option>
+                        <option value="spd-desc">とくぼうが高い順</option>
+                        <option value="spe-desc">すばやさが高い順</option>
+                    </select>
+                    <button id="random-pokemon-btn" onclick="selectRandomPokemon()" class="px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap" title="ランダムに1匹選ぶ">
+                        <i class="fa-solid fa-dice"></i>
+                        <span class="hidden sm:inline">ランダム</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Form Category Filter Tabs -->
+            <div class="flex flex-col gap-1.5 pt-2 border-t border-slate-100">
+                <div class="text-xs font-bold text-slate-500">フォルム絞り込み</div>
+                <div id="form-filters" class="flex flex-wrap gap-2 pt-1">
+                    <button type="button" data-form="all" class="form-filter-chip px-3 py-1.5 rounded-lg text-xs font-bold transition-all border bg-slate-900 text-white border-slate-900 shadow-xs cursor-pointer">
+                        すべて (<span id="count-all">0</span>)
+                    </button>
+                    <button type="button" data-form="mega" class="form-filter-chip px-3 py-1.5 rounded-lg text-xs font-bold transition-all border bg-slate-100 hover:bg-purple-50 text-slate-700 border-slate-200 cursor-pointer">
+                        <i class="fa-solid fa-dna text-purple-600 mr-1"></i>メガシンカ・ゲンシカイキ (<span id="count-mega">0</span>)
+                    </button>
+                    <button type="button" data-form="regional" class="form-filter-chip px-3 py-1.5 rounded-lg text-xs font-bold transition-all border bg-slate-100 hover:bg-sky-50 text-slate-700 border-slate-200 cursor-pointer">
+                        <i class="fa-solid fa-earth-asia text-sky-600 mr-1"></i>リージョン (アローラ/ガラル/ヒスイ/パルデア) (<span id="count-regional">0</span>)
+                    </button>
+                    <button type="button" data-form="normal" class="form-filter-chip px-3 py-1.5 rounded-lg text-xs font-bold transition-all border bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200 cursor-pointer">
+                        通常種のみ (<span id="count-normal">0</span>)
+                    </button>
+                    <button type="button" data-form="other" class="form-filter-chip px-3 py-1.5 rounded-lg text-xs font-bold transition-all border bg-slate-100 hover:bg-amber-50 text-slate-700 border-slate-200 cursor-pointer">
+                        <i class="fa-solid fa-shapes text-amber-600 mr-1"></i>その他フォルム (<span id="count-other">0</span>)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Type Filter Buttons -->
+            <div class="flex flex-col gap-1.5 pt-2 border-t border-slate-100">
+                <div class="flex justify-between items-center text-xs font-bold text-slate-500">
+                    <span>タイプで絞り込み (複数選択可)</span>
+                    <button id="reset-types" class="text-red-600 hover:underline cursor-pointer hidden">すべて解除</button>
+                </div>
+                <div id="type-filters" class="flex flex-wrap gap-1.5 pt-1">
+                    <!-- Dynamically generated type chips -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Info & View Toggle -->
+        <div class="flex justify-between items-center px-1">
+            <p id="result-count" class="text-sm text-slate-600 font-medium">検索結果: <span class="font-bold text-slate-900">0</span> 匹</p>
+            <div class="flex items-center gap-2">
+                <button id="compare-toggle-btn" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                    <span>比較モード</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Pokémon Grid -->
+        <div id="pokemon-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <!-- Dynamic Cards Loaded Here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-16 px-4 bg-white rounded-2xl border border-slate-200 text-center">
+            <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center text-2xl mb-4">
+                <i class="fa-solid fa-ghost"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800">該当するポケモンが見つかりません</h3>
+            <p class="text-sm text-slate-500 mt-1">検索キーワードやタイプフィルターを変更してみてください。</p>
+        </div>
+
+    </main>
+
+    <!-- Detail Modal -->
+    <div id="detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+        <div id="modal-content" class="bg-white rounded-3xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-300 flex flex-col">
+            <!-- Modal Header populated dynamically -->
+        </div>
+    </div>
+
+    <!-- Compare Modal -->
+    <div id="compare-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 flex flex-col gap-4">
+            <div class="flex justify-between items-center border-b pb-4">
+                <h2 class="text-xl font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-scale-balanced text-red-500"></i>
+                    <span>ポケモン種族値 比較</span>
+                </h2>
+                <button id="close-compare-modal" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="compare-container" class="overflow-x-auto">
+                <!-- Comparison table or cards -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Message Box Modal (replaces alert) -->
+    <div id="custom-alert-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 flex flex-col gap-4 text-center">
+            <div class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <p id="custom-alert-message" class="text-sm font-bold text-slate-800"></p>
+            <button onclick="closeCustomAlert()" class="w-full py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 cursor-pointer">閉じる</button>
+        </div>
+    </div>
+
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p>© 2026 PokéStats JP API App. Data provided by PokéAPI (pokeapi.co).</p>
+            <div class="flex items-center gap-4">
+                <span class="flex items-center gap-1"><i class="fa-solid fa-circle-check text-emerald-500" id="footer-status"></i> 超高速キャッシュ連携中</span>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
