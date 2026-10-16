@@ -64,8 +64,8 @@
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
 
-        <!-- Search & Filters Card -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col gap-4">
+        <!-- Search & Filters Card (Sticky) -->
+        <div id="search-card" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col gap-4 sticky top-[68px] z-40 transition-all duration-300">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Search input -->
                 <div class="relative md:col-span-2">
@@ -98,6 +98,9 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Collapsible: Form & Type Filters (hidden when compact) -->
+            <div class="collapsible-filters flex flex-col gap-4">
 
             <!-- Form Category Filter Tabs -->
             <div class="flex flex-col gap-1.5 pt-2 border-t border-slate-100">
@@ -138,6 +141,8 @@
                     <!-- Dynamically generated type chips -->
                 </div>
             </div>
+
+            </div><!-- /collapsible-filters -->
         </div>
 
         <!-- Results Info & View Toggle -->
