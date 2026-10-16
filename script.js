@@ -54,11 +54,11 @@ const EMBEDDED_FALLBACK_POKEMON = [
     { id: 10059, baseId: 448, name: "メガルカリオ", formType: "mega", formLabel: "メガシンカ", types: ["かくとう", "はがね"], hp: 70, atk: 145, def: 88, spa: 140, spd: 70, spe: 112, total: 625, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10059.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10059.ogg" },
     { id: 10038, baseId: 94, name: "メガゲンガー", formType: "mega", formLabel: "メガシンカ", types: ["ゴースト", "どく"], hp: 60, atk: 65, def: 80, spa: 170, spd: 95, spe: 130, total: 600, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10038.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10038.ogg" },
     // リージョンフォーム
-    { id: 10091, baseId: 19, name: "コラッタ (アローラのすがた)", formType: "regional", formLabel: "アローラ", types: ["あく", "ノーマル"], hp: 30, atk: 56, def: 35, spa: 25, spd: 35, spe: 72, total: 253, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10091.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/19.ogg" },
-    { id: 10100, baseId: 26, name: "ライチュウ (アローラのすがた)", formType: "regional", formLabel: "アローラ", types: ["でんき", "エスパー"], hp: 60, atk: 85, def: 50, spa: 95, spd: 85, spe: 110, total: 485, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10100.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/26.ogg" },
-    { id: 10103, baseId: 37, name: "ロコン (アローラのすがた)", formType: "regional", formLabel: "アローラ", types: ["こおり"], hp: 38, atk: 41, def: 40, spa: 50, spd: 65, spe: 65, total: 299, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10103.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/37.ogg" },
-    { id: 10165, baseId: 263, name: "ジグザグマ (ガラルのすがた)", formType: "regional", formLabel: "ガラル", types: ["あく", "ノーマル"], hp: 38, atk: 30, def: 41, spa: 30, spd: 41, spe: 60, total: 240, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10165.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/263.ogg" },
-    { id: 10238, baseId: 570, name: "ゾロア (ヒスイのすがた)", formType: "regional", formLabel: "ヒスイ", types: ["ノーマル", "ゴースト"], hp: 35, atk: 60, def: 40, spa: 85, spd: 40, spe: 70, total: 330, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10238.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/570.ogg" }
+    { id: 10091, baseId: 19, name: "コラッタ (アローラのすがた)", formType: "regional", formLabel: "アローラ", types: ["あく", "ノーマル"], hp: 30, atk: 56, def: 35, spa: 25, spd: 35, spe: 72, total: 253, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10091.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10091.ogg" },
+    { id: 10100, baseId: 26, name: "ライチュウ (アローラのすがた)", formType: "regional", formLabel: "アローラ", types: ["でんき", "エスパー"], hp: 60, atk: 85, def: 50, spa: 95, spd: 85, spe: 110, total: 485, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10100.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10100.ogg" },
+    { id: 10103, baseId: 37, name: "ロコン (アローラのすがた)", formType: "regional", formLabel: "アローラ", types: ["こおり"], hp: 38, atk: 41, def: 40, spa: 50, spd: 65, spe: 65, total: 299, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10103.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10103.ogg" },
+    { id: 10165, baseId: 263, name: "ジグザグマ (ガラルのすがた)", formType: "regional", formLabel: "ガラル", types: ["あく", "ノーマル"], hp: 38, atk: 30, def: 41, spa: 30, spd: 41, spe: 60, total: 240, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10165.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10165.ogg" },
+    { id: 10238, baseId: 570, name: "ゾロア (ヒスイのすがた)", formType: "regional", formLabel: "ヒスイ", types: ["ノーマル", "ゴースト"], hp: 35, atk: 60, def: 40, spa: 85, spd: 40, spe: 70, total: 330, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10238.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10238.ogg" }
 ];
 
 let pokemonList = [];
@@ -758,43 +758,48 @@ function playPokemonCry(url) {
 function playPokemonCrySafe(p) {
     if (!p) return;
 
-    // 鳴き声URLの候補リスト（順次試行）
-    const candidateUrls = [];
-    
-    // 1. 指定のcryがあれば（spritesの誤りをcriesに補正）
-    if (p.cry) {
-        candidateUrls.push(p.cry.replace('/sprites/pokemon/latest/', '/cries/pokemon/latest/'));
-    }
-    // 2. 特殊フォルムIDの最新ogg (例: メガリザードンX: 10034.ogg)
-    candidateUrls.push(`https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${p.id}.ogg`);
-    // 3. 通常種番号の最新ogg (例: リザードン: 6.ogg)
-    if (p.baseId && p.baseId !== p.id) {
-        candidateUrls.push(`https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${p.baseId}.ogg`);
-    }
+    const isSpecialForm = (p.id > 1025) || (p.formType && p.formType !== 'normal');
 
-    const uniqueUrls = [...new Set(candidateUrls)];
-
-    // 候補を順番に試す多重フォールバック
-    function tryPlayUrl(index) {
-        if (index >= uniqueUrls.length) {
-            console.warn("All cry audio candidates failed, playing synthetic melody instead.");
-            playStatMelody(p);
-            return;
+    // 特殊フォルム（メガシンカ、リージョンフォームなど）の場合
+    if (isSpecialForm) {
+        // 専用音源URLを決定
+        let formCryUrl = p.cry ? p.cry.replace('/sprites/pokemon/latest/', '/cries/pokemon/latest/') : null;
+        
+        // もし元の通常ポケモンのbaseId音源が指定されていた場合は専用音源ではないのでフォルム固有IDを試す
+        if (formCryUrl && p.baseId && formCryUrl.endsWith(`/${p.baseId}.ogg`) && p.baseId !== p.id) {
+            formCryUrl = `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${p.id}.ogg`;
+        }
+        if (!formCryUrl) {
+            formCryUrl = `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${p.id}.ogg`;
         }
 
-        const audioUrl = uniqueUrls[index];
-        const audio = new Audio(audioUrl);
+        const audio = new Audio(formCryUrl);
         audio.volume = 0.6;
 
         audio.play().then(() => {
-            // 再生成功
+            // 専用音源の再生成功！
         }).catch(err => {
-            console.warn(`Cry playback failed for ${audioUrl}, trying next candidate...`, err);
-            tryPlayUrl(index + 1);
+            console.warn(`専用鳴き声の再生に失敗 (${formCryUrl}):`, err);
+            // 元のポケモンの鳴き声にはフォールバックせず、未対応通知を表示
+            showAlert(`「${p.name}」の専用鳴き声には対応していません。`);
         });
+        return;
     }
 
-    tryPlayUrl(0);
+    // 通常種ポケモンの場合
+    const normalCryUrl = p.cry 
+        ? p.cry.replace('/sprites/pokemon/latest/', '/cries/pokemon/latest/')
+        : `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${p.id}.ogg`;
+
+    const audio = new Audio(normalCryUrl);
+    audio.volume = 0.6;
+
+    audio.play().then(() => {
+        // 再生成功
+    }).catch(err => {
+        console.warn(`鳴き声の再生に失敗 (${normalCryUrl}):`, err);
+        showAlert(`「${p.name}」の鳴き声には対応していません。`);
+    });
 }
 
 function closeDetailModal() {
