@@ -68,6 +68,28 @@ let compareList = [];
 const TOTAL_POKEMON_TARGET = 1351;
 let isPlayingAudio = false;
 
+// ピカチュウ・コライドン・ミライドンの姿を基本の1つだけにする除外判定
+function shouldExcludePokemon(rawName, id, baseId) {
+    const n = (rawName || '').toLowerCase();
+    
+    // ピカチュウの姿違いを除外 (ID 25 の基本姿のみ残す)
+    if ((n.startsWith('pikachu-') || baseId === 25) && id !== 25) {
+        return true;
+    }
+    
+    // コライドンの派生形態を除外 (ID 1007 の基本姿のみ残す)
+    if ((n.startsWith('koraidon-') || baseId === 1007) && id !== 1007) {
+        return true;
+    }
+    
+    // ミライドンの派生形態を除外 (ID 1008 の基本姿のみ残す)
+    if ((n.startsWith('miraidon-') || baseId === 1008) && id !== 1008) {
+        return true;
+    }
+    
+    return false;
+}
+
 // フォルム情報の自動判定
 function determineFormInfo(rawName, id, speciesName) {
     if (id <= 1025) {
@@ -216,11 +238,14 @@ function updateFormCounts() {
 }
 
 async function fetchOptimizedPokemonData() {
-    const CACHE_KEY = 'pokestats_master_v1351_all_forms';
-    const cached = localStorage.getItem(CACHE_KEY);
+    const CACHE_KEY = 'poketone_clean_v1';
+    // 既存キャッシュからピカチュウ・コライドン・ミライドンの不要な姿を即座に除外
+    const cached = localStorage.getItem(CACHE_KEY) || localStorage.getItem('pokestats_master_v1351_all_forms');
     if (cached) {
         try {
-            pokemonList = JSON.parse(cached);
+            const rawList = JSON.parse(cached);
+            pokemonList = rawList.filter(p => !shouldExcludePokemon(p.rawName || p.name, p.id, p.baseId));
+            localStorage.setItem(CACHE_KEY, JSON.stringify(pokemonList));
             updateLoadedCount();
             updateFormCounts();
             document.getElementById('loading-banner').classList.add('hidden');
@@ -231,18 +256,24 @@ async function fetchOptimizedPokemonData() {
         }
     }
 
-    // 初期状態は内蔵フォールバック（メガシンカやアローラ姿を含む）を表示
-    pokemonList = [...EMBEDDED_FALLBACK_POKEMON];
+    // 初期状態は内蔵フォールバックを表示
+    pokemonList = [...EMBEDDED_FALLBACK_POKEMON].filter(p => !shouldExcludePokemon(p.rawName || p.name, p.id, p.baseId));
     updateLoadedCount();
     updateFormCounts();
     filterAndRenderPokemon();
 
     try {
-        // 全ポケモン（通常種1025 + 特殊フォルム326 = 計1351種）を取得
+        // 全ポケモンリストを取得
         const res = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=10000`);
         if (!res.ok) throw new Error('API limit reached');
         const data = await res.json();
-        const allItems = data.results;
+        
+        // ピカチュウ、コライドン、ミライドンの不要な派生フォルムを最初から除外
+        const allItems = data.results.filter(item => {
+            const idMatch = item.url.match(/\/pokemon\/(\d+)\//);
+            const id = idMatch ? parseInt(idMatch[1]) : 0;
+            return !shouldExcludePokemon(item.name, id);
+        });
         
         document.getElementById('total-target-count').textContent = allItems.length;
 
@@ -264,6 +295,7 @@ async function fetchOptimizedPokemonData() {
                 const idMatch = item.url.match(/\/pokemon\/(\d+)\//);
                 const id = idMatch ? parseInt(idMatch[1]) : 0;
                 if (!id) return;
+                if (shouldExcludePokemon(item.name, id)) return;
                 
                 // すでに読み込み済みでかつformTypeが揃っている場合はスキップ
                 const existingIndex = loaded.findIndex(p => p.id === id);
@@ -280,6 +312,8 @@ async function fetchOptimizedPokemonData() {
                         const m = speciesUrl.match(/\/pokemon-species\/(\d+)\//);
                         if (m) baseId = parseInt(m[1]);
                     }
+
+                    if (shouldExcludePokemon(pData.name, id, baseId)) return;
 
                     // 日本語種族名を取得（キャッシュにあれば再利用してAPI節約）
                     let speciesName = speciesNameCache[baseId];
@@ -346,8 +380,8 @@ async function fetchOptimizedPokemonData() {
 
             await Promise.all(promises);
 
-            // ソート: 全国図鑑番号（baseId）順かつ同一番号内はID順（通常ポケモンの直後にメガシンカやアローラが並ぶ）
-            pokemonList = loaded.sort((a, b) => {
+            // ソート: 全国図鑑番号（baseId）順かつ同一番号内はID順
+            pokemonList = loaded.filter(p => !shouldExcludePokemon(p.rawName, p.id, p.baseId)).sort((a, b) => {
                 if (a.baseId === b.baseId) return a.id - b.id;
                 return a.baseId - b.baseId;
             });
@@ -431,6 +465,7 @@ function filterAndRenderPokemon() {
     const sortType = document.getElementById('sort-select').value;
 
     let filtered = pokemonList.filter(p => {
+        if (shouldExcludePokemon(p.rawName || p.name, p.id, p.baseId)) return false;
         // 検索クエリマッチ（名前、図鑑番号、PokeAPI-ID、フォルム名、rawName）
         const matchQuery = !query || 
             p.name.toLowerCase().includes(query) || 
