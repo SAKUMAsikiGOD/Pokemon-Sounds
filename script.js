@@ -978,9 +978,21 @@ function closeCompareModal() {
 
 // ---- Sticky Search Card: compact mode on scroll ----
 (function () {
-    const COMPACT_THRESHOLD = 100; // px スクロールしたらコンパクト化
+    const COMPACT_THRESHOLD = 80; // px スクロールしたらコンパクト化
     const searchCard = document.getElementById('search-card');
-    if (!searchCard) return;
+    const header = document.querySelector('header');
+    if (!searchCard || !header) return;
+
+    // ヘッダーの実際の高さを計測してtopを動的に設定
+    function updateTopOffset() {
+        const headerHeight = header.getBoundingClientRect().height;
+        searchCard.style.top = headerHeight + 'px';
+    }
+
+    updateTopOffset();
+
+    // リサイズ時（スマホ回転など）にも再計算
+    window.addEventListener('resize', updateTopOffset, { passive: true });
 
     let ticking = false;
     window.addEventListener('scroll', () => {
@@ -997,4 +1009,3 @@ function closeCompareModal() {
         }
     }, { passive: true });
 })();
-
