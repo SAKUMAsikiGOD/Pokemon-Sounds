@@ -68,6 +68,13 @@ let compareList = [];
 const TOTAL_POKEMON_TARGET = 1351;
 let isPlayingAudio = false;
 
+// 描画パフォーマンス向上のための変数
+const PAGE_SIZE = 48;
+let renderedCount = 0;
+let currentFilteredList = [];
+let infiniteScrollObserver = null;
+let searchDebounceTimeout = null;
+
 // ピカチュウ・コライドン・ミライドンの姿を基本の1つだけにする除外判定
 function shouldExcludePokemon(rawName, id, baseId) {
     const n = (rawName || '').toLowerCase();
@@ -181,7 +188,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initFormFilterEvents();
     fetchOptimizedPokemonData();
 
-    document.getElementById('search-input').addEventListener('input', filterAndRenderPokemon);
+    document.getElementById('search-input').addEventListener('input', () => {
+        clearTimeout(searchDebounceTimeout);
+        searchDebounceTimeout = setTimeout(filterAndRenderPokemon, 120);
+    });
     document.getElementById('sort-select').addEventListener('change', filterAndRenderPokemon);
     document.getElementById('reset-types').addEventListener('click', () => {
         selectedTypes.clear();
@@ -539,17 +549,36 @@ function getFormBadgeHtml(p) {
 function renderPokemonGrid(list) {
     const grid = document.getElementById('pokemon-grid');
     const emptyState = document.getElementById('empty-state');
+    const sentinel = document.getElementById('scroll-sentinel');
     const resCountSpan = document.getElementById('result-count')?.querySelector('span');
     if (resCountSpan) resCountSpan.textContent = list.length;
 
+    currentFilteredList = list;
+    renderedCount = 0;
+    grid.innerHTML = '';
+
     if (list.length === 0) {
-        grid.innerHTML = '';
         emptyState.classList.remove('hidden');
+        if (sentinel) sentinel.classList.add('hidden');
         return;
     }
 
     emptyState.classList.add('hidden');
-    grid.innerHTML = list.map(p => {
+    renderNextBatch();
+    initInfiniteScroll();
+}
+
+function renderNextBatch() {
+    if (renderedCount >= currentFilteredList.length) {
+        const sentinel = document.getElementById('scroll-sentinel');
+        if (sentinel) sentinel.classList.add('hidden');
+        return;
+    }
+
+    const grid = document.getElementById('pokemon-grid');
+    const batch = currentFilteredList.slice(renderedCount, renderedCount + PAGE_SIZE);
+
+    const html = batch.map(p => {
         const isComparing = compareList.some(c => c.id === p.id);
         const badge = getFormBadgeHtml(p);
         const displayId = (p.baseId || p.id).toString().padStart(4, '0');
@@ -566,7 +595,7 @@ function renderPokemonGrid(list) {
                     </button>
                 </div>
                 <div class="my-2 flex justify-center">
-                    <img src="${p.image}" alt="${p.name}" class="w-28 h-28 object-contain group-hover:scale-110 transition-transform duration-300" onerror="this.src='https://placehold.co/150x150/f1f5f1/94a3b8?text=No+Image'">
+                    <img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async" class="w-28 h-28 object-contain group-hover:scale-110 transition-transform duration-300" onerror="this.src='https://placehold.co/150x150/f1f5f1/94a3b8?text=No+Image'">
                 </div>
                 <div class="flex flex-col gap-2">
                     <h3 class="text-sm sm:text-base font-bold text-slate-800 text-center line-clamp-1" title="${p.name}">${p.name}</h3>
@@ -584,6 +613,31 @@ function renderPokemonGrid(list) {
             </div>
         `;
     }).join('');
+
+    grid.insertAdjacentHTML('beforeend', html);
+    renderedCount += batch.length;
+
+    const sentinel = document.getElementById('scroll-sentinel');
+    if (sentinel) {
+        sentinel.classList.toggle('hidden', renderedCount >= currentFilteredList.length);
+    }
+}
+
+function initInfiniteScroll() {
+    const sentinel = document.getElementById('scroll-sentinel');
+    if (!sentinel) return;
+
+    if (infiniteScrollObserver) {
+        infiniteScrollObserver.disconnect();
+    }
+
+    infiniteScrollObserver = new IntersectionObserver((entries) => {
+        if (entries[0] && entries[0].isIntersecting) {
+            renderNextBatch();
+        }
+    }, { rootMargin: '400px' });
+
+    infiniteScrollObserver.observe(sentinel);
 }
 
 function openDetailModalFromId(id) {
