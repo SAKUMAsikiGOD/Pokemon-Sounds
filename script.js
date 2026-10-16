@@ -975,3 +975,26 @@ function removeCompare(id) {
 function closeCompareModal() {
     document.getElementById('compare-modal').classList.add('hidden');
 }
+
+// ---- Sticky Search Card: compact mode on scroll ----
+(function () {
+    const COMPACT_THRESHOLD = 100; // px スクロールしたらコンパクト化
+    const searchCard = document.getElementById('search-card');
+    if (!searchCard) return;
+
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                if (window.scrollY > COMPACT_THRESHOLD) {
+                    searchCard.classList.add('compact');
+                } else {
+                    searchCard.classList.remove('compact');
+                }
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }, { passive: true });
+})();
+
