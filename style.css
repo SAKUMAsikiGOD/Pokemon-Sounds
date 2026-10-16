@@ -20,3 +20,41 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
+
+/* Sticky search card compact mode */
+#search-card {
+    transition: padding 0.25s ease, box-shadow 0.25s ease, border-radius 0.25s ease;
+}
+
+#search-card.compact {
+    padding: 10px 16px;
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 4px 24px 0 rgba(0,0,0,0.10);
+    border-top-color: transparent;
+}
+
+#search-card.compact .collapsible-filters {
+    display: none;
+}
+
+#search-card.compact .grid {
+    margin: 0;
+}
+
+#search-card.compact .search-row-gap {
+    gap: 8px;
+}
+
+/* Smooth height transition for collapsible filters */
+.collapsible-filters {
+    transition: max-height 0.25s ease, opacity 0.2s ease;
+    overflow: hidden;
+    max-height: 300px;
+    opacity: 1;
+}
+
+#search-card.compact .collapsible-filters {
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
