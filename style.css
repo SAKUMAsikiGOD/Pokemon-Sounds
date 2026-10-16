@@ -39,10 +39,21 @@ body {
 
 #search-card.compact .grid {
     margin: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    align-items: center;
 }
 
-#search-card.compact .search-row-gap {
-    gap: 8px;
+/* コンパクト時は検索入力が縮まないようにする */
+#search-card.compact .grid > .relative {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+/* コンパクト時のソート+ランダムボタン列 */
+#search-card.compact .grid > .flex {
+    flex: 0 0 auto;
 }
 
 /* Smooth height transition for collapsible filters */
