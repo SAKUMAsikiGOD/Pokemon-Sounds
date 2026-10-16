@@ -32,7 +32,7 @@
                     <h1 class="text-xl sm:text-2xl font-black tracking-wider flex items-center gap-2">
                         <span>Pokétone</span>
                         <span
-                            class="text-xs bg-gradient-to-r from-red-600 to-purple-600 text-white px-2.5 py-0.5 rounded-full font-bold shadow-xs">メガシンカ・リージョン全1350+種対応</span>
+                            class="text-xs bg-gradient-to-r from-red-600 to-purple-600 text-white px-2.5 py-0.5 rounded-full font-bold shadow-xs">メガシンカ・リージョン全1300+種対応</span>
                     </h1>
                 </div>
             </div>
@@ -47,7 +47,7 @@
                     class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-2">
                     <i class="fa-solid fa-database text-red-400"></i>
                     <span>読込済み: <strong id="loaded-count" class="text-white">0</strong> / <span
-                            id="total-target-count">1351</span> 匹</span>
+                            id="total-target-count">1327</span> 匹</span>
                 </div>
             </div>
         </div>
@@ -156,6 +156,12 @@
         <!-- Pokémon Grid -->
         <div id="pokemon-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <!-- Dynamic Cards Loaded Here -->
+        </div>
+
+        <!-- Scroll Sentinel for Infinite Scrolling -->
+        <div id="scroll-sentinel" class="py-6 flex justify-center items-center text-slate-400 text-xs hidden">
+            <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+            <span>さらに読み込み中...</span>
         </div>
 
         <!-- Empty State -->
