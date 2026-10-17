@@ -64,7 +64,6 @@ const EMBEDDED_FALLBACK_POKEMON = [
 let pokemonList = [];
 let selectedTypes = new Set();
 let currentFormFilter = 'all';
-let compareList = [];
 const TOTAL_POKEMON_TARGET = 1351;
 let isPlayingAudio = false;
 
@@ -201,9 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('reset-types').classList.add('hidden');
         filterAndRenderPokemon();
     });
-
-    document.getElementById('compare-toggle-btn').addEventListener('click', openCompareModal);
-    document.getElementById('close-compare-modal').addEventListener('click', closeCompareModal);
     document.getElementById('detail-modal').addEventListener('click', (e) => {
         if (e.target.id === 'detail-modal') closeDetailModal();
     });
@@ -586,7 +582,6 @@ function renderNextBatch() {
     const batch = currentFilteredList.slice(renderedCount, renderedCount + PAGE_SIZE);
 
     const html = batch.map(p => {
-        const isComparing = compareList.some(c => c.id === p.id);
         const badge = getFormBadgeHtml(p);
         const displayId = (p.baseId || p.id).toString().padStart(4, '0');
 
@@ -597,9 +592,6 @@ function renderNextBatch() {
                         <span class="text-xs font-black text-slate-400">#${displayId}</span>
                         ${badge}
                     </div>
-                    <button onclick="event.stopPropagation(); toggleCompare(${p.id})" class="text-xs px-2 py-1 rounded-lg border transition-colors ${isComparing ? 'bg-red-500 text-white border-red-500 font-bold' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'}">
-                        ${isComparing ? '比較中' : '比較'}
-                    </button>
                 </div>
                 <div class="my-2 flex justify-center">
                     <img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async" class="w-28 h-28 object-contain group-hover:scale-110 transition-transform duration-300" onerror="this.src='https://placehold.co/150x150/f1f5f1/94a3b8?text=No+Image'">
@@ -906,74 +898,6 @@ function playStatMelody(p) {
             btn.classList.remove('opacity-50');
         }
     }
-}
-
-function toggleCompare(id) {
-    const p = pokemonList.find(item => item.id === id);
-    if (!p) return;
-    const index = compareList.findIndex(c => c.id === id);
-    if (index > -1) {
-        compareList.splice(index, 1);
-    } else {
-        if (compareList.length >= 3) {
-            showAlert('比較できるのは最大3匹までです。');
-            return;
-        }
-        compareList.push(p);
-    }
-    filterAndRenderPokemon();
-}
-
-function openCompareModal() {
-    if (compareList.length === 0) {
-        showAlert('比較するポケモンが選択されていません。カードの「比較」ボタンを押してください。');
-        return;
-    }
-    const container = document.getElementById('compare-container');
-    container.innerHTML = `
-        <div class="grid grid-cols-${compareList.length + 1} gap-4 min-w-[500px]">
-            <div class="flex flex-col gap-4 font-bold text-xs text-slate-500 pt-32">
-                <div>HP</div>
-                <div>こうげき</div>
-                <div>ぼうぎょ</div>
-                <div>とくこう</div>
-                <div>とくぼう</div>
-                <div>すばやさ</div>
-                <div class="pt-2 border-t">合計</div>
-            </div>
-            ${compareList.map(p => `
-                <div class="flex flex-col gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center">
-                    <button onclick="removeCompare(${p.id})" class="self-end text-xs text-slate-400 hover:text-red-600 cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-                    <img src="${p.image}" class="w-20 h-20 object-contain mx-auto" onerror="this.src='https://placehold.co/150x150/f1f5f1/94a3b8?text=No+Image'">
-                    <h4 class="font-bold text-xs sm:text-sm text-slate-800 line-clamp-2">${p.name}</h4>
-                    <div class="flex flex-col gap-4 text-xs font-black text-slate-900 mt-2">
-                        <div>${p.hp}</div>
-                        <div>${p.atk}</div>
-                        <div>${p.def}</div>
-                        <div>${p.spa}</div>
-                        <div>${p.spd}</div>
-                        <div>${p.spe}</div>
-                        <div class="pt-2 border-t text-red-600">${p.total}</div>
-                    </div>
-                </div>
-            `).join('')}
-        </div>
-    `;
-    document.getElementById('compare-modal').classList.remove('hidden');
-}
-
-function removeCompare(id) {
-    compareList = compareList.filter(c => c.id !== id);
-    filterAndRenderPokemon();
-    if (compareList.length === 0) {
-        closeCompareModal();
-    } else {
-        openCompareModal();
-    }
-}
-
-function closeCompareModal() {
-    document.getElementById('compare-modal').classList.add('hidden');
 }
 
 // ---- Sticky Search Card: compact mode on scroll ----
