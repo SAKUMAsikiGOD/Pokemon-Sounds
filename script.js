@@ -187,19 +187,49 @@ document.addEventListener('DOMContentLoaded', () => {
     initFormFilterEvents();
     fetchOptimizedPokemonData();
 
-    document.getElementById('search-input').addEventListener('input', () => {
+    const searchInput = document.getElementById('search-input');
+    const stickySearchInput = document.getElementById('sticky-search-input');
+    const sortSelect = document.getElementById('sort-select');
+    const stickySortSelect = document.getElementById('sticky-sort-select');
+
+    function onSearchChange(val) {
+        if (searchInput && searchInput.value !== val) searchInput.value = val;
+        if (stickySearchInput && stickySearchInput.value !== val) stickySearchInput.value = val;
         clearTimeout(searchDebounceTimeout);
         searchDebounceTimeout = setTimeout(filterAndRenderPokemon, 120);
-    });
-    document.getElementById('sort-select').addEventListener('change', filterAndRenderPokemon);
-    document.getElementById('reset-types').addEventListener('click', () => {
-        selectedTypes.clear();
-        document.querySelectorAll('.type-chip').forEach(el => {
-            el.classList.remove('ring-2', 'ring-slate-900', 'scale-105', 'font-bold');
-        });
-        document.getElementById('reset-types').classList.add('hidden');
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => onSearchChange(e.target.value));
+    }
+    if (stickySearchInput) {
+        stickySearchInput.addEventListener('input', (e) => onSearchChange(e.target.value));
+    }
+
+    function onSortChange(val) {
+        if (sortSelect && sortSelect.value !== val) sortSelect.value = val;
+        if (stickySortSelect && stickySortSelect.value !== val) stickySortSelect.value = val;
         filterAndRenderPokemon();
-    });
+    }
+
+    if (sortSelect) {
+        sortSelect.addEventListener('change', (e) => onSortChange(e.target.value));
+    }
+    if (stickySortSelect) {
+        stickySortSelect.addEventListener('change', (e) => onSortChange(e.target.value));
+    }
+
+    function handleResetTypes() {
+        selectedTypes.clear();
+        syncTypeChips();
+        filterAndRenderPokemon();
+    }
+
+    const resetBtn1 = document.getElementById('reset-types');
+    const resetBtn2 = document.getElementById('sticky-reset-types');
+    if (resetBtn1) resetBtn1.addEventListener('click', handleResetTypes);
+    if (resetBtn2) resetBtn2.addEventListener('click', handleResetTypes);
+
     document.getElementById('detail-modal').addEventListener('click', (e) => {
         if (e.target.id === 'detail-modal') closeDetailModal();
     });
@@ -209,13 +239,18 @@ function initFormFilterEvents() {
     const chips = document.querySelectorAll('.form-filter-chip');
     chips.forEach(chip => {
         chip.addEventListener('click', () => {
-            chips.forEach(c => {
-                c.classList.remove('bg-slate-900', 'text-white', 'border-slate-900', 'shadow-xs');
-                c.classList.add('bg-slate-100', 'text-slate-700', 'border-slate-200');
+            const formVal = chip.dataset.form;
+            currentFormFilter = formVal;
+            // メイン・sticky両方のすべてのチップのアクティブ状態を同期
+            document.querySelectorAll('.form-filter-chip').forEach(c => {
+                if (c.dataset.form === formVal) {
+                    c.classList.add('bg-slate-900', 'text-white', 'border-slate-900', 'shadow-xs');
+                    c.classList.remove('bg-slate-100', 'text-slate-700', 'border-slate-200');
+                } else {
+                    c.classList.remove('bg-slate-900', 'text-white', 'border-slate-900', 'shadow-xs');
+                    c.classList.add('bg-slate-100', 'text-slate-700', 'border-slate-200');
+                }
             });
-            chip.classList.add('bg-slate-900', 'text-white', 'border-slate-900', 'shadow-xs');
-            chip.classList.remove('bg-slate-100', 'text-slate-700', 'border-slate-200');
-            currentFormFilter = chip.dataset.form;
             filterAndRenderPokemon();
         });
     });
@@ -230,17 +265,12 @@ function updateFormCounts() {
         other: pokemonList.filter(p => p.formType === 'other').length
     };
     
-    const countAll = document.getElementById('count-all');
-    const countMega = document.getElementById('count-mega');
-    const countRegional = document.getElementById('count-regional');
-    const countNormal = document.getElementById('count-normal');
-    const countOther = document.getElementById('count-other');
-
-    if (countAll) countAll.textContent = counts.all;
-    if (countMega) countMega.textContent = counts.mega;
-    if (countRegional) countRegional.textContent = counts.regional;
-    if (countNormal) countNormal.textContent = counts.normal;
-    if (countOther) countOther.textContent = counts.other;
+    ['all', 'mega', 'regional', 'normal', 'other'].forEach(key => {
+        const el1 = document.getElementById(`count-${key}`);
+        const el2 = document.getElementById(`sticky-count-${key}`);
+        if (el1) el1.textContent = counts[key];
+        if (el2) el2.textContent = counts[key];
+    });
 }
 
 async function fetchOptimizedPokemonData() {
@@ -449,28 +479,48 @@ function playMewMelodyDirectly() {
 }
 
 function renderTypeFilters() {
-    const container = document.getElementById('type-filters');
-    container.innerHTML = '';
-    Object.keys(typeEnToJp).forEach(enKey => {
-        const jpName = typeEnToJp[enKey];
-        const colorInfo = typeColors[jpName] || { bg: "bg-slate-500", text: "text-white" };
-        const btn = document.createElement('button');
-        btn.className = `type-chip px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer border border-slate-200/50 shadow-xs hover:scale-105 ${colorInfo.bg} ${colorInfo.text} opacity-90 hover:opacity-100`;
-        btn.textContent = jpName;
-        btn.dataset.type = jpName;
-        btn.onclick = () => {
-            if (selectedTypes.has(jpName)) {
-                selectedTypes.delete(jpName);
-                btn.classList.remove('ring-2', 'ring-slate-900', 'scale-105');
-            } else {
-                selectedTypes.add(jpName);
-                btn.classList.add('ring-2', 'ring-slate-900', 'scale-105');
-            }
-            document.getElementById('reset-types').classList.toggle('hidden', selectedTypes.size === 0);
-            filterAndRenderPokemon();
-        };
-        container.appendChild(btn);
+    const containers = [
+        document.getElementById('type-filters'),
+        document.getElementById('sticky-type-filters')
+    ].filter(Boolean);
+
+    containers.forEach(container => {
+        container.innerHTML = '';
+        Object.keys(typeEnToJp).forEach(enKey => {
+            const jpName = typeEnToJp[enKey];
+            const colorInfo = typeColors[jpName] || { bg: "bg-slate-500", text: "text-white" };
+            const btn = document.createElement('button');
+            btn.className = `type-chip px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer border border-slate-200/50 shadow-xs hover:scale-105 ${colorInfo.bg} ${colorInfo.text} opacity-90 hover:opacity-100`;
+            btn.textContent = jpName;
+            btn.dataset.type = jpName;
+            btn.onclick = () => {
+                if (selectedTypes.has(jpName)) {
+                    selectedTypes.delete(jpName);
+                } else {
+                    selectedTypes.add(jpName);
+                }
+                syncTypeChips();
+                filterAndRenderPokemon();
+            };
+            container.appendChild(btn);
+        });
     });
+}
+
+function syncTypeChips() {
+    document.querySelectorAll('.type-chip').forEach(el => {
+        const type = el.dataset.type;
+        if (selectedTypes.has(type)) {
+            el.classList.add('ring-2', 'ring-slate-900', 'scale-105');
+        } else {
+            el.classList.remove('ring-2', 'ring-slate-900', 'scale-105');
+        }
+    });
+    const hasSelected = selectedTypes.size > 0;
+    const r1 = document.getElementById('reset-types');
+    const r2 = document.getElementById('sticky-reset-types');
+    if (r1) r1.classList.toggle('hidden', !hasSelected);
+    if (r2) r2.classList.toggle('hidden', !hasSelected);
 }
 
 // ひらがな・カタカナ相互変換用ユーティリティ
@@ -922,51 +972,88 @@ function playStatMelody(p) {
     }
 }
 
-// ---- Sticky Search Card: compact mode on scroll ----
+// ---- Top Sticky Floating Trigger & Accordion Panel on scroll ----
 (function () {
     const searchCard = document.getElementById('search-card');
     const header = document.querySelector('header');
-    if (!searchCard || !header) return;
+    const toggleBtn = document.getElementById('sticky-search-toggle');
+    const drawer = document.getElementById('sticky-search-drawer');
+    const toggleArrow = document.getElementById('sticky-toggle-arrow');
+    const toggleText = document.getElementById('sticky-toggle-text');
+    const closeBtn = document.getElementById('sticky-close-btn');
+    const stickyInput = document.getElementById('sticky-search-input');
+
+    if (!header || !toggleBtn || !drawer) return;
 
     // ヘッダーの実際の高さをCSSカスタムプロパティで管理
-    function updateTopOffset() {
+    function updateHeaderHeight() {
         const h = header.getBoundingClientRect().height;
         document.documentElement.style.setProperty('--header-h', h + 'px');
-        searchCard.style.top = h + 'px';
     }
 
-    // DOMContentLoaded後 + フォント読み込み後に確実に計測
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
-            requestAnimationFrame(() => {
-                setTimeout(updateTopOffset, 50);
-            });
+            requestAnimationFrame(() => setTimeout(updateHeaderHeight, 50));
         });
     } else {
-        requestAnimationFrame(() => {
-            setTimeout(updateTopOffset, 50);
-        });
+        requestAnimationFrame(() => setTimeout(updateHeaderHeight, 50));
     }
 
-    // ResizeObserverでヘッダーサイズ変化（フォント読み込み完了・画面回転など）を追跡
     if (window.ResizeObserver) {
-        new ResizeObserver(updateTopOffset).observe(header);
+        new ResizeObserver(updateHeaderHeight).observe(header);
     } else {
-        window.addEventListener('resize', updateTopOffset, { passive: true });
+        window.addEventListener('resize', updateHeaderHeight, { passive: true });
     }
 
-    const THRESHOLD_ON = 100;
-    const THRESHOLD_OFF = 40;
+    let isDrawerOpen = false;
 
+    function openDrawer() {
+        isDrawerOpen = true;
+        drawer.classList.add('open');
+        if (toggleArrow) toggleArrow.classList.add('rotate-180');
+        if (toggleText) toggleText.textContent = '検索・絞り込みを閉じる';
+        setTimeout(() => {
+            if (stickyInput) stickyInput.focus();
+        }, 150);
+    }
+
+    function closeDrawer() {
+        isDrawerOpen = false;
+        drawer.classList.remove('open');
+        if (toggleArrow) toggleArrow.classList.remove('rotate-180');
+        if (toggleText) toggleText.textContent = '検索・絞り込みを表示';
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        if (isDrawerOpen) {
+            closeDrawer();
+        } else {
+            openDrawer();
+        }
+    });
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeDrawer);
+    }
+
+    // スクロール検知：元の検索カードが画面上部に隠れたら下向き矢印ボタンを出現
+    const THRESHOLD_ON = 280;
+    const THRESHOLD_OFF = 160;
+    let isVisible = false;
     let ticking = false;
+
     window.addEventListener('scroll', () => {
         if (!ticking) {
             window.requestAnimationFrame(() => {
-                const isCompact = searchCard.classList.contains('compact');
-                if (!isCompact && window.scrollY > THRESHOLD_ON) {
-                    searchCard.classList.add('compact');
-                } else if (isCompact && window.scrollY < THRESHOLD_OFF) {
-                    searchCard.classList.remove('compact');
+                const y = window.scrollY;
+                if (!isVisible && y > THRESHOLD_ON) {
+                    isVisible = true;
+                    toggleBtn.classList.add('visible');
+                } else if (isVisible && y < THRESHOLD_OFF) {
+                    isVisible = false;
+                    toggleBtn.classList.remove('visible');
+                    // 最上部付近に戻ったらドロワーも自動的に閉じる
+                    if (isDrawerOpen) closeDrawer();
                 }
                 ticking = false;
             });
