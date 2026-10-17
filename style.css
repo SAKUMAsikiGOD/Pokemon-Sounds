@@ -21,51 +21,65 @@ body {
     background: #94a3b8;
 }
 
-/* Sticky search card compact mode */
+/* Sticky search card */
 #search-card {
-    transition: padding 0.25s ease, box-shadow 0.25s ease, border-radius 0.25s ease;
+    transition: padding 0.2s ease, box-shadow 0.2s ease, border-radius 0.2s ease;
+    /* topはJSで動的に設定 */
 }
 
+/* コンパクトモード（スクロール後） */
 #search-card.compact {
-    padding: 10px 16px;
+    padding: 8px 16px;
     border-radius: 0 0 16px 16px;
-    box-shadow: 0 4px 24px 0 rgba(0,0,0,0.10);
+    box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.12);
     border-top-color: transparent;
 }
 
-#search-card.compact .collapsible-filters {
-    display: none;
+/* コンパクト時：検索行を横並び1行に強制 */
+#search-card.compact .search-grid {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    align-items: center !important;
+    grid-template-columns: none !important;
 }
 
-#search-card.compact .grid {
-    margin: 0;
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 8px;
-    align-items: center;
-}
-
-/* コンパクト時は検索入力が縮まないようにする */
-#search-card.compact .grid > .relative {
+/* コンパクト時：検索inputが伸縮 */
+#search-card.compact .search-grid > .search-input-wrap {
     flex: 1 1 0;
     min-width: 0;
 }
 
-/* コンパクト時のソート+ランダムボタン列 */
-#search-card.compact .grid > .flex {
+/* コンパクト時：ソート+ランダムの幅を制限 */
+#search-card.compact .search-grid > .sort-wrap {
     flex: 0 0 auto;
+    display: flex;
+    gap: 6px;
+    align-items: center;
 }
 
-/* Smooth height transition for collapsible filters */
+/* コンパクト時：ソートselectの幅を固定 */
+#search-card.compact .search-grid > .sort-wrap select {
+    width: 130px;
+    min-width: 0;
+    font-size: 11px;
+    padding: 6px 8px;
+}
+
+/* コンパクト時：フォルム・タイプフィルターをアニメーションで収縮 */
 .collapsible-filters {
-    transition: max-height 0.25s ease, opacity 0.2s ease;
     overflow: hidden;
-    max-height: 300px;
+    max-height: 400px;
     opacity: 1;
+    transition: max-height 0.2s ease, opacity 0.15s ease, margin 0.2s ease;
+    margin-top: 0;
 }
 
 #search-card.compact .collapsible-filters {
-    max-height: 0;
-    opacity: 0;
-    pointer-events: none;
+    max-height: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    margin-top: 0 !important;
 }
+
