@@ -902,21 +902,37 @@ function playStatMelody(p) {
 
 // ---- Sticky Search Card: compact mode on scroll ----
 (function () {
-    const COMPACT_THRESHOLD = 80; // px スクロールしたらコンパクト化
+    const COMPACT_THRESHOLD = 80;
     const searchCard = document.getElementById('search-card');
     const header = document.querySelector('header');
     if (!searchCard || !header) return;
 
-    // ヘッダーの実際の高さを計測してtopを動的に設定
+    // ヘッダーの実際の高さをCSSカスタムプロパティで管理
     function updateTopOffset() {
-        const headerHeight = header.getBoundingClientRect().height;
-        searchCard.style.top = headerHeight + 'px';
+        const h = header.getBoundingClientRect().height;
+        document.documentElement.style.setProperty('--header-h', h + 'px');
+        searchCard.style.top = h + 'px';
     }
 
-    updateTopOffset();
+    // DOMContentLoaded後 + フォント読み込み後に確実に計測
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            requestAnimationFrame(() => {
+                setTimeout(updateTopOffset, 50);
+            });
+        });
+    } else {
+        requestAnimationFrame(() => {
+            setTimeout(updateTopOffset, 50);
+        });
+    }
 
-    // リサイズ時（スマホ回転など）にも再計算
-    window.addEventListener('resize', updateTopOffset, { passive: true });
+    // ResizeObserverでヘッダーサイズ変化（フォント読み込み完了・画面回転など）を追跡
+    if (window.ResizeObserver) {
+        new ResizeObserver(updateTopOffset).observe(header);
+    } else {
+        window.addEventListener('resize', updateTopOffset, { passive: true });
+    }
 
     let ticking = false;
     window.addEventListener('scroll', () => {
