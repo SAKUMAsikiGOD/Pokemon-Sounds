@@ -473,17 +473,39 @@ function renderTypeFilters() {
     });
 }
 
+// ひらがな・カタカナ相互変換用ユーティリティ
+function toKatakana(str) {
+    return str.replace(/[\u3041-\u3096]/g, match => String.fromCharCode(match.charCodeAt(0) + 0x60));
+}
+function toHiragana(str) {
+    return str.replace(/[\u30a1-\u30f6]/g, match => String.fromCharCode(match.charCodeAt(0) - 0x60));
+}
+
 function filterAndRenderPokemon() {
-    const query = document.getElementById('search-input').value.trim().toLowerCase();
+    const rawQuery = document.getElementById('search-input').value.trim();
+    const query = rawQuery.toLowerCase();
+    const queryKata = toKatakana(query);
+    const queryHira = toHiragana(query);
     const sortType = document.getElementById('sort-select').value;
 
     let filtered = pokemonList.filter(p => {
         if (shouldExcludePokemon(p.rawName || p.name, p.id, p.baseId)) return false;
-        // 検索クエリマッチ（名前、図鑑番号、PokeAPI-ID、フォルム名、rawName）
+        // 検索クエリマッチ（名前、ひらがな・カタカナ両対応、図鑑番号、PokeAPI-ID、フォルム名、rawName）
+        const pNameLower = p.name ? p.name.toLowerCase() : '';
+        const pNameHira = toHiragana(pNameLower);
+        const pFormLower = p.formLabel ? p.formLabel.toLowerCase() : '';
+        const pFormHira = toHiragana(pFormLower);
+
         const matchQuery = !query || 
-            p.name.toLowerCase().includes(query) || 
+            pNameLower.includes(query) ||
+            pNameLower.includes(queryKata) ||
+            pNameHira.includes(query) ||
+            pNameHira.includes(queryHira) ||
+            pFormLower.includes(query) ||
+            pFormLower.includes(queryKata) ||
+            pFormHira.includes(query) ||
+            pFormHira.includes(queryHira) ||
             (p.rawName && p.rawName.toLowerCase().includes(query)) ||
-            (p.formLabel && p.formLabel.toLowerCase().includes(query)) ||
             p.id.toString() === query ||
             (p.baseId && p.baseId.toString() === query) ||
             (p.baseId && p.baseId.toString().padStart(3, '0') === query) ||
