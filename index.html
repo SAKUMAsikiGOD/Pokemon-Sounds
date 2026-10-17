@@ -51,6 +51,105 @@
         </div>
     </header>
 
+    <!-- Top Sticky Floating Trigger & Accordion Panel -->
+    <div id="sticky-search-wrapper" class="sticky top-0 z-40 w-full pointer-events-none transition-all duration-300">
+        <!-- Floating Toggle Bar: appears when scrolled down -->
+        <div class="max-w-7xl mx-auto px-4 flex justify-center">
+            <button id="sticky-search-toggle" type="button"
+                class="pointer-events-auto bg-slate-900/95 hover:bg-slate-900 text-white backdrop-blur-md px-5 py-2 rounded-b-2xl shadow-lg border border-t-0 border-slate-700/60 text-xs sm:text-sm font-bold flex items-center gap-2 transition-all transform -translate-y-full opacity-0 hover:shadow-xl cursor-pointer">
+                <i class="fa-solid fa-magnifying-glass text-red-400"></i>
+                <span id="sticky-toggle-text">検索・絞り込みを表示</span>
+                <i id="sticky-toggle-arrow" class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-300"></i>
+            </button>
+        </div>
+
+        <!-- Accordion Drawer (Full Search & Filter UI) -->
+        <div id="sticky-search-drawer"
+            class="pointer-events-auto max-h-0 opacity-0 overflow-hidden transition-all duration-300 ease-in-out bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-2xl">
+            <div class="max-w-7xl mx-auto px-4 py-4 max-h-[80vh] overflow-y-auto flex flex-col gap-4">
+                <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                    <span class="text-xs font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-sliders text-red-500"></i> ポケモン検索・絞り込み
+                    </span>
+                    <button id="sticky-close-btn" type="button" class="text-slate-400 hover:text-slate-700 text-xs font-bold flex items-center gap-1 px-2 py-1 rounded hover:bg-slate-100 cursor-pointer">
+                        <span>閉じる</span>
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- 1行目: 検索入力 ＆ ソート ＆ ランダム -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="relative md:col-span-2">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" id="sticky-search-input" placeholder="ポケモン名、図鑑番号、フォルム（例: ピカチュウ, ぴかちゅう, 25）..."
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white text-sm transition-all shadow-inner">
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="sticky-sort-select"
+                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 text-sm font-medium">
+                            <option value="id-asc">図鑑番号順 (昇順)</option>
+                            <option value="id-desc">図鑑番号順 (降順)</option>
+                            <option value="total-desc">種族値合計が高い順</option>
+                            <option value="total-asc">種族値合計が低い順</option>
+                            <option value="hp-desc">HPが高い順</option>
+                            <option value="atk-desc">こうげきが高い順</option>
+                            <option value="def-desc">ぼうぎょが高い順</option>
+                            <option value="spa-desc">とくこうが高い順</option>
+                            <option value="spd-desc">とくぼうが高い順</option>
+                            <option value="spe-desc">すばやさが高い順</option>
+                        </select>
+                        <button type="button" onclick="selectRandomPokemon()"
+                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+                            title="ランダムに1匹選ぶ">
+                            <i class="fa-solid fa-dice"></i>
+                            <span class="hidden sm:inline">ランダム</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2行目: フォルム絞り込み -->
+                <div class="flex flex-col gap-1.5 pt-2 border-t border-slate-100">
+                    <div class="text-xs font-bold text-slate-500">フォルム絞り込み</div>
+                    <div id="sticky-form-filters" class="flex flex-wrap gap-2 pt-1">
+                        <button type="button" data-form="all"
+                            class="form-filter-chip px-3 py-1.5 rounded-lg text-xs font-bold transition-all border bg-slate-900 text-white border-slate-900 shadow-xs cursor-pointer">
+                            すべて (<span id="sticky-count-all">0</span>)
+                        </button>
+                        <button type="button" data-form="mega"
+                            class="form-filter-chip px-3 py-1.5 rounded-lg text-xs font-bold transition-all border bg-slate-100 hover:bg-purple-50 text-slate-700 border-slate-200 cursor-pointer">
+                            <i class="fa-solid fa-dna text-purple-600 mr-1"></i>メガシンカ・ゲンシカイキ (<span id="sticky-count-mega">0</span>)
+                        </button>
+                        <button type="button" data-form="regional"
+                            class="form-filter-chip px-3 py-1.5 rounded-lg text-xs font-bold transition-all border bg-slate-100 hover:bg-sky-50 text-slate-700 border-slate-200 cursor-pointer">
+                            <i class="fa-solid fa-earth-asia text-sky-600 mr-1"></i>リージョン (<span id="sticky-count-regional">0</span>)
+                        </button>
+                        <button type="button" data-form="normal"
+                            class="form-filter-chip px-3 py-1.5 rounded-lg text-xs font-bold transition-all border bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200 cursor-pointer">
+                            通常種のみ (<span id="sticky-count-normal">0</span>)
+                        </button>
+                        <button type="button" data-form="other"
+                            class="form-filter-chip px-3 py-1.5 rounded-lg text-xs font-bold transition-all border bg-slate-100 hover:bg-amber-50 text-slate-700 border-slate-200 cursor-pointer">
+                            <i class="fa-solid fa-shapes text-amber-600 mr-1"></i>その他フォルム (<span id="sticky-count-other">0</span>)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3行目: タイプ絞り込み -->
+                <div class="flex flex-col gap-1.5 pt-2 border-t border-slate-100">
+                    <div class="flex justify-between items-center text-xs font-bold text-slate-500">
+                        <span>タイプで絞り込み (複数選択可)</span>
+                        <button id="sticky-reset-types" type="button" class="text-red-600 hover:underline cursor-pointer hidden">すべて解除</button>
+                    </div>
+                    <div id="sticky-type-filters" class="flex flex-wrap gap-1.5 pt-1">
+                        <!-- Dynamically populated type chips -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="loading-banner"
         class="bg-gradient-to-r from-red-600 via-purple-600 to-indigo-600 text-white px-4 py-2 text-center text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-inner">
         <i class="fa-solid fa-spinner fa-spin"></i>
@@ -62,8 +161,8 @@
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
 
-        <!-- Search & Filters Card (Sticky) -->
-        <div id="search-card" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col gap-4 sticky top-0 z-40 transition-all duration-300">
+        <!-- Search & Filters Card -->
+        <div id="search-card" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col gap-4">
             <div class="search-grid grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Search input -->
                 <div class="search-input-wrap relative md:col-span-2">
@@ -97,8 +196,7 @@
                 </div>
             </div>
 
-            <!-- Collapsible: Form & Type Filters (hidden when compact) -->
-            <div class="collapsible-filters flex flex-col gap-4">
+            <div class="flex flex-col gap-4">
 
             <!-- Form Category Filter Tabs -->
             <div class="flex flex-col gap-1.5 pt-2 border-t border-slate-100">
@@ -140,7 +238,7 @@
                 </div>
             </div>
 
-            </div><!-- /collapsible-filters -->
+            </div>
         </div>
 
         <!-- Results Info -->
