@@ -21,65 +21,23 @@ body {
     background: #94a3b8;
 }
 
-/* Sticky search card */
-#search-card {
-    transition: padding 0.2s ease, box-shadow 0.2s ease, border-radius 0.2s ease;
-    /* topはJSで動的に設定 */
+/* Sticky Search Wrapper & Floating Trigger */
+#sticky-search-wrapper {
+    top: var(--header-h, 0px);
 }
 
-/* コンパクトモード（スクロール後） */
-#search-card.compact {
-    padding: 8px 16px;
-    border-radius: 0 0 16px 16px;
-    box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.12);
-    border-top-color: transparent;
-}
-
-/* コンパクト時：検索行を横並び1行に強制 */
-#search-card.compact .search-grid {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    gap: 8px !important;
-    align-items: center !important;
-    grid-template-columns: none !important;
-}
-
-/* コンパクト時：検索inputが伸縮 */
-#search-card.compact .search-grid > .search-input-wrap {
-    flex: 1 1 0;
-    min-width: 0;
-}
-
-/* コンパクト時：ソート+ランダムの幅を制限 */
-#search-card.compact .search-grid > .sort-wrap {
-    flex: 0 0 auto;
-    display: flex;
-    gap: 6px;
-    align-items: center;
-}
-
-/* コンパクト時：ソートselectの幅を固定 */
-#search-card.compact .search-grid > .sort-wrap select {
-    width: 130px;
-    min-width: 0;
-    font-size: 11px;
-    padding: 6px 8px;
-}
-
-/* コンパクト時：フォルム・タイプフィルターをアニメーションで収縮 */
-.collapsible-filters {
-    overflow: hidden;
-    max-height: 400px;
+#sticky-search-toggle.visible {
+    transform: translateY(0);
     opacity: 1;
-    transition: max-height 0.2s ease, opacity 0.15s ease, margin 0.2s ease;
-    margin-top: 0;
 }
 
-#search-card.compact .collapsible-filters {
-    max-height: 0 !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-    margin-top: 0 !important;
+/* Accordion Drawer open state */
+#sticky-search-drawer.open {
+    max-height: 85vh;
+    opacity: 1;
+}
+
+#sticky-toggle-arrow.rotate-180 {
+    transform: rotate(180deg);
 }
 
