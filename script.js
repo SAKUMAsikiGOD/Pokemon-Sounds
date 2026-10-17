@@ -902,7 +902,6 @@ function playStatMelody(p) {
 
 // ---- Sticky Search Card: compact mode on scroll ----
 (function () {
-    const COMPACT_THRESHOLD = 80;
     const searchCard = document.getElementById('search-card');
     const header = document.querySelector('header');
     if (!searchCard || !header) return;
@@ -934,13 +933,17 @@ function playStatMelody(p) {
         window.addEventListener('resize', updateTopOffset, { passive: true });
     }
 
+    const THRESHOLD_ON = 100;
+    const THRESHOLD_OFF = 40;
+
     let ticking = false;
     window.addEventListener('scroll', () => {
         if (!ticking) {
             window.requestAnimationFrame(() => {
-                if (window.scrollY > COMPACT_THRESHOLD) {
+                const isCompact = searchCard.classList.contains('compact');
+                if (!isCompact && window.scrollY > THRESHOLD_ON) {
                     searchCard.classList.add('compact');
-                } else {
+                } else if (isCompact && window.scrollY < THRESHOLD_OFF) {
                     searchCard.classList.remove('compact');
                 }
                 ticking = false;
