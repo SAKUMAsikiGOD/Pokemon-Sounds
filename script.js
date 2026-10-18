@@ -74,25 +74,48 @@ let currentFilteredList = [];
 let infiniteScrollObserver = null;
 let searchDebounceTimeout = null;
 
-// ピカチュウ・コライドン・ミライドンの姿を基本の1つだけにする除外判定
+// 除外判定：キョダイマックス、ピカチュウ/イーブイ/コライドン/ミライドンの不要な姿、重複アローラ姿(totem)、パルデアケンタロスの重複等
 function shouldExcludePokemon(rawName, id, baseId) {
     const n = (rawName || '').toLowerCase();
-    
-    // ピカチュウの姿違いを除外 (ID 25 の基本姿のみ残す)
+
+    // 1. キョダイマックスの姿の完全除外
+    if (n.includes('-gmax')) {
+        return true;
+    }
+
+    // 2. ピカチュウの姿違いを除外 (ID 25 の基本姿のみ残す)
     if ((n.startsWith('pikachu-') || baseId === 25) && id !== 25) {
         return true;
     }
-    
-    // コライドンの派生形態を除外 (ID 1007 の基本姿のみ残す)
+
+    // 3. イーブイの姿違いを除外 (ID 133 の基本姿のみ残す。パートナーイーブイ等を除外)
+    if ((n.startsWith('eevee-') || baseId === 133) && id !== 133) {
+        return true;
+    }
+
+    // 4. コライドンの派生形態を除外 (ID 1007 の基本姿のみ残す)
     if ((n.startsWith('koraidon-') || baseId === 1007) && id !== 1007) {
         return true;
     }
-    
-    // ミライドンの派生形態を除外 (ID 1008 の基本姿のみ残す)
+
+    // 5. ミライドンの派生形態を除外 (ID 1008 の基本姿のみ残す)
     if ((n.startsWith('miraidon-') || baseId === 1008) && id !== 1008) {
         return true;
     }
-    
+
+    // 6. アローララッタ (ID 20)、ガラガラ (ID 105) などのぬしポケモン(totem)重複を除外
+    // 例: raticate-totem-alola, marowak-totem 等の重複を除外
+    if (n.includes('-totem')) {
+        return true;
+    }
+
+    // 7. パルデアケンタロス (ID 128) の姿の統一
+    // tauros-paldea-combat-breed (ID 10250) のみを「ケンタロス (パルデアのすがた)」として残し、
+    // blaze-breed (ID 10251) と aqua-breed (ID 10252) は重複・区別しづらいため除外
+    if (n.includes('tauros-paldea-blaze') || n.includes('tauros-paldea-aqua')) {
+        return true;
+    }
+
     return false;
 }
 
@@ -240,10 +263,16 @@ function initFormFilterEvents() {
     chips.forEach(chip => {
         chip.addEventListener('click', () => {
             const formVal = chip.dataset.form;
-            currentFormFilter = formVal;
+            // 既に選択されている項目を再クリックしたら解除（未選択＝すべて表示）
+            if (currentFormFilter === formVal) {
+                currentFormFilter = 'all';
+            } else {
+                currentFormFilter = formVal;
+            }
+
             // メイン・sticky両方のすべてのチップのアクティブ状態を同期
             document.querySelectorAll('.form-filter-chip').forEach(c => {
-                if (c.dataset.form === formVal) {
+                if (c.dataset.form === currentFormFilter) {
                     c.classList.add('bg-slate-900', 'text-white', 'border-slate-900', 'shadow-xs');
                     c.classList.remove('bg-slate-100', 'text-slate-700', 'border-slate-200');
                 } else {
@@ -258,14 +287,13 @@ function initFormFilterEvents() {
 
 function updateFormCounts() {
     const counts = {
-        all: pokemonList.length,
         mega: pokemonList.filter(p => p.formType === 'mega').length,
         regional: pokemonList.filter(p => p.formType === 'regional').length,
         normal: pokemonList.filter(p => p.formType === 'normal').length,
         other: pokemonList.filter(p => p.formType === 'other').length
     };
     
-    ['all', 'mega', 'regional', 'normal', 'other'].forEach(key => {
+    ['mega', 'regional', 'normal', 'other'].forEach(key => {
         const el1 = document.getElementById(`count-${key}`);
         const el2 = document.getElementById(`sticky-count-${key}`);
         if (el1) el1.textContent = counts[key];
@@ -274,9 +302,9 @@ function updateFormCounts() {
 }
 
 async function fetchOptimizedPokemonData() {
-    const CACHE_KEY = 'poketone_clean_v1';
-    // 既存キャッシュからピカチュウ・コライドン・ミライドンの不要な姿を除外し、鳴き声URLを正しいcriesリポジトリに自動修復
-    const cached = localStorage.getItem(CACHE_KEY) || localStorage.getItem('pokestats_master_v1351_all_forms');
+    const CACHE_KEY = 'poketone_clean_v2';
+    // 既存キャッシュからキョダイマックス・重複姿を除外し、鳴き声URLを最新リポジトリに自動修復
+    const cached = localStorage.getItem(CACHE_KEY) || localStorage.getItem('poketone_clean_v1') || localStorage.getItem('pokestats_master_v1351_all_forms');
     if (cached) {
         try {
             const rawList = JSON.parse(cached);
@@ -451,6 +479,13 @@ async function fetchOptimizedPokemonData() {
 function updateLoadedCount() {
     const el = document.getElementById('loaded-count');
     if (el) el.textContent = pokemonList.length;
+    const targetEl = document.getElementById('total-target-count');
+    if (targetEl) {
+        // キャッシュ済みあるいは全読み込み時は実データ数と一致させる
+        if (pokemonList.length > 50) {
+            targetEl.textContent = pokemonList.length;
+        }
+    }
 }
 
 function selectRandomPokemon() {
@@ -470,12 +505,10 @@ function playMewMelodyDirectly() {
     }
     let mew = pokemonList.find(p => p.id === 151 || (p.baseId === 151 && p.formType === 'normal'));
     if (!mew) {
-        mew = pokemonList.find(p => p.name.includes('ミュウ')) || pokemonList[0];
+        mew = pokemonList.find(p => p.name.includes('ミュウ')) || { hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100, total: 600 };
     }
-    openDetailModal(mew);
-    setTimeout(() => {
-        playStatMelody(mew);
-    }, 300);
+    // 詳細モーダルを開かずに、ミュウの種族値音（All 100）のみを直接再生
+    playStatMelody(mew);
 }
 
 function renderTypeFilters() {
@@ -537,47 +570,60 @@ function filterAndRenderPokemon() {
     const queryKata = toKatakana(query);
     const queryHira = toHiragana(query);
     const sortType = document.getElementById('sort-select').value;
+    const hasQuery = Boolean(query);
 
     let filtered = pokemonList.filter(p => {
-        if (shouldExcludePokemon(p.rawName || p.name, p.id, p.baseId)) return false;
-        // 検索クエリマッチ（名前、ひらがな・カタカナ両対応、図鑑番号、PokeAPI-ID、フォルム名、rawName）
-        const pNameLower = p.name ? p.name.toLowerCase() : '';
-        const pNameHira = toHiragana(pNameLower);
-        const pFormLower = p.formLabel ? p.formLabel.toLowerCase() : '';
-        const pFormHira = toHiragana(pFormLower);
-
-        const matchQuery = !query || 
-            pNameLower.includes(query) ||
-            pNameLower.includes(queryKata) ||
-            pNameHira.includes(query) ||
-            pNameHira.includes(queryHira) ||
-            pFormLower.includes(query) ||
-            pFormLower.includes(queryKata) ||
-            pFormHira.includes(query) ||
-            pFormHira.includes(queryHira) ||
-            (p.rawName && p.rawName.toLowerCase().includes(query)) ||
-            p.id.toString() === query ||
-            (p.baseId && p.baseId.toString() === query) ||
-            (p.baseId && p.baseId.toString().padStart(3, '0') === query) ||
-            (p.baseId && p.baseId.toString().padStart(4, '0') === query);
-
-        // フォルムフィルター
-        let matchForm = true;
+        // 1. フォルムフィルター（最速で判定・脱出）
         if (currentFormFilter === 'mega') {
-            matchForm = (p.formType === 'mega');
+            if (p.formType !== 'mega') return false;
         } else if (currentFormFilter === 'regional') {
-            matchForm = (p.formType === 'regional');
+            if (p.formType !== 'regional') return false;
         } else if (currentFormFilter === 'normal') {
-            matchForm = (p.formType === 'normal');
+            if (p.formType !== 'normal') return false;
         } else if (currentFormFilter === 'other') {
-            matchForm = (p.formType === 'other');
+            if (p.formType !== 'other') return false;
         }
 
-        // タイプフィルター
-        const matchType = selectedTypes.size === 0 || 
-            Array.from(selectedTypes).every(t => p.types.includes(t));
+        // 2. タイプフィルター（最速で判定・脱出）
+        if (selectedTypes.size > 0) {
+            for (const t of selectedTypes) {
+                if (!p.types.includes(t)) return false;
+            }
+        }
 
-        return matchQuery && matchForm && matchType;
+        if (!hasQuery) return true;
+
+        // 3. 検索文字列キャッシュ（初回のみ計算・2回目以降ゼロコスト）
+        if (!p._sc) {
+            const nl = (p.name || '').toLowerCase();
+            const fl = (p.formLabel || '').toLowerCase();
+            p._sc = {
+                name: nl,
+                nameHira: toHiragana(nl),
+                form: fl,
+                formHira: toHiragana(fl),
+                rawName: (p.rawName || '').toLowerCase(),
+                idStr: p.id.toString(),
+                baseIdStr: p.baseId ? p.baseId.toString() : '',
+                baseIdPad3: p.baseId ? p.baseId.toString().padStart(3, '0') : '',
+                baseIdPad4: p.baseId ? p.baseId.toString().padStart(4, '0') : ''
+            };
+        }
+
+        const sc = p._sc;
+        return sc.name.includes(query) ||
+               sc.name.includes(queryKata) ||
+               sc.nameHira.includes(query) ||
+               sc.nameHira.includes(queryHira) ||
+               sc.form.includes(query) ||
+               sc.form.includes(queryKata) ||
+               sc.formHira.includes(query) ||
+               sc.formHira.includes(queryHira) ||
+               sc.rawName.includes(query) ||
+               sc.idStr === query ||
+               sc.baseIdStr === query ||
+               sc.baseIdPad3 === query ||
+               sc.baseIdPad4 === query;
     });
 
     // ソート処理
@@ -658,7 +704,7 @@ function renderNextBatch() {
         const displayId = (p.baseId || p.id).toString().padStart(4, '0');
 
         return `
-            <div onclick="openDetailModalFromId(${p.id})" class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group relative">
+            <div onclick="openDetailModalFromId(${p.id})" class="pokemon-card-item bg-white rounded-2xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group relative">
                 <div class="flex justify-between items-start">
                     <div class="flex items-center gap-1.5 flex-wrap">
                         <span class="text-xs font-black text-slate-400">#${displayId}</span>
@@ -666,7 +712,7 @@ function renderNextBatch() {
                     </div>
                 </div>
                 <div class="my-2 flex justify-center">
-                    <img src="${p.image}" alt="${p.name}" loading="lazy" decoding="async" class="w-28 h-28 object-contain group-hover:scale-110 transition-transform duration-300" onerror="this.src='https://placehold.co/150x150/f1f5f1/94a3b8?text=No+Image'">
+                    <img src="${p.image}" alt="${p.name}" width="112" height="112" loading="lazy" decoding="async" class="w-28 h-28 object-contain group-hover:scale-110 transition-transform duration-300" onerror="this.src='https://placehold.co/150x150/f1f5f1/94a3b8?text=No+Image'">
                 </div>
                 <div class="flex flex-col gap-2">
                     <h3 class="text-sm sm:text-base font-bold text-slate-800 text-center line-clamp-1" title="${p.name}">${p.name}</h3>
@@ -760,10 +806,16 @@ function openDetailModal(p) {
                         <i class="fa-solid fa-volume-high"></i>
                         <span>ポケモンの鳴き声を聴く (安全再生)</span>
                     </button>
-                    <button onclick="playStatMelodyCurrent()" id="play-melody-btn" class="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer">
-                        <i class="fa-solid fa-music"></i>
-                        <span>種族値メロディを聴く (合計含む)</span>
-                    </button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="playStatMelodyCurrent()" id="play-melody-btn" class="py-2.5 px-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer" title="このポケモンの種族値メロディを再生">
+                            <i class="fa-solid fa-music"></i>
+                            <span class="line-clamp-1">種族値メロディ</span>
+                        </button>
+                        <button onclick="playMewMelodyDirectly()" class="py-2.5 px-2 bg-pink-600 hover:bg-pink-700 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer" title="全種族値100の基準音（ミュウ）を聴く">
+                            <i class="fa-solid fa-cat text-pink-200"></i>
+                            <span class="line-clamp-1">ミュウの基準音</span>
+                        </button>
+                    </div>
                     <div class="bg-white p-2.5 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
                         <span class="text-slate-500 font-bold">種族値総合計</span>
                         <span id="total-stat-display" class="text-base font-black text-red-600">${p.total}</span>
@@ -890,7 +942,7 @@ function playStatMelody(p) {
         const ctx = new AudioContext();
 
         const stats = [p.hp, p.atk, p.def, p.spa, p.spd, p.spe];
-        const noteDuration = 0.28;
+        const noteDuration = 0.50; // 音の出る速さを約0.5秒おきに調整
 
         function statToFreq(val) {
             return 130 + (val / 255) * 750;
@@ -907,8 +959,8 @@ function playStatMelody(p) {
             osc.frequency.setValueAtTime(freq, startTime);
 
             gain.gain.setValueAtTime(0, startTime);
-            gain.gain.linearRampToValueAtTime(0.25, startTime + 0.05);
-            gain.gain.exponentialRampToValueAtTime(0.001, startTime + noteDuration - 0.02);
+            gain.gain.linearRampToValueAtTime(0.25, startTime + 0.06);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + noteDuration - 0.04);
 
             osc.connect(gain);
             gain.connect(ctx.destination);
@@ -926,7 +978,7 @@ function playStatMelody(p) {
         });
 
         const totalStartTime = ctx.currentTime + (stats.length * noteDuration);
-        const totalDuration = 0.5;
+        const totalDuration = 0.7;
         const totalFreq = 300 + (Math.min(p.total, 720) / 720) * 800;
 
         setTimeout(() => {
@@ -942,7 +994,7 @@ function playStatMelody(p) {
         totalOsc.frequency.setValueAtTime(totalFreq, totalStartTime);
 
         totalGain.gain.setValueAtTime(0, totalStartTime);
-        totalGain.gain.linearRampToValueAtTime(0.35, totalStartTime + 0.08);
+        totalGain.gain.linearRampToValueAtTime(0.35, totalStartTime + 0.1);
         totalGain.gain.exponentialRampToValueAtTime(0.001, totalStartTime + totalDuration);
 
         totalOsc.connect(totalGain);
@@ -980,7 +1032,6 @@ function playStatMelody(p) {
     const drawer = document.getElementById('sticky-search-drawer');
     const toggleArrow = document.getElementById('sticky-toggle-arrow');
     const toggleText = document.getElementById('sticky-toggle-text');
-    const closeBtn = document.getElementById('sticky-close-btn');
     const stickyInput = document.getElementById('sticky-search-input');
 
     if (!header || !toggleBtn || !drawer) return;
@@ -1032,10 +1083,6 @@ function playStatMelody(p) {
         }
     });
 
-    if (closeBtn) {
-        closeBtn.addEventListener('click', closeDrawer);
-    }
-
     // スクロール検知：元の検索カードが画面上部に隠れたら下向き矢印ボタンを出現
     const THRESHOLD_ON = 280;
     const THRESHOLD_OFF = 160;
@@ -1061,3 +1108,364 @@ function playStatMelody(p) {
         }
     }, { passive: true });
 })();
+
+// ==========================================
+// Quiz Mode Implementation
+// ==========================================
+let quizCurrentMode = 'normal'; // 'normal' | 'hard'
+let quizTargetPokemon = null;
+let quizRemainingAttempts = 10;
+const QUIZ_MAX_ATTEMPTS = 10;
+let quizGuessedList = []; // Array of guessed pokemon objects
+
+function openQuizModal() {
+    if (pokemonList.length === 0) {
+        showAlert('ポケモンデータを取得中です。少々お待ちください。');
+        return;
+    }
+    const modal = document.getElementById('quiz-modal');
+    modal.classList.remove('hidden');
+    requestAnimationFrame(() => {
+        modal.classList.remove('opacity-0');
+    });
+    backToQuizModeSelect();
+}
+
+function closeQuizModal() {
+    const modal = document.getElementById('quiz-modal');
+    modal.classList.add('opacity-0');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
+    stopQuizWave();
+    if (window.activeAudioTimeout) clearTimeout(window.activeAudioTimeout);
+}
+
+function triggerQuizWave(durationSec) {
+    const bars = document.querySelectorAll('.quiz-wave-bar');
+    bars.forEach(b => b.classList.add('playing'));
+    setTimeout(() => {
+        bars.forEach(b => b.classList.remove('playing'));
+    }, (durationSec || 2.4) * 1000);
+}
+
+function stopQuizWave() {
+    document.querySelectorAll('.quiz-wave-bar').forEach(b => b.classList.remove('playing'));
+}
+
+function backToQuizModeSelect() {
+    document.getElementById('quiz-mode-select-screen').classList.remove('hidden');
+    document.getElementById('quiz-playing-screen').classList.add('hidden');
+    document.getElementById('quiz-result-screen').classList.add('hidden');
+    document.getElementById('quiz-badge-mode').textContent = '';
+    stopQuizWave();
+}
+
+function startQuiz(mode) {
+    quizCurrentMode = mode;
+    quizRemainingAttempts = QUIZ_MAX_ATTEMPTS;
+    quizGuessedList = [];
+
+    // 出題候補の絞り込み
+    let candidates = [];
+    if (mode === 'normal') {
+        candidates = pokemonList.filter(p => {
+            if (p.formType === 'mega') return true;
+            if (p.total >= 460) return true;
+            return false;
+        });
+        if (candidates.length === 0) candidates = pokemonList;
+        document.getElementById('quiz-badge-mode').textContent = 'ノーマル';
+    } else {
+        candidates = [...pokemonList];
+        document.getElementById('quiz-badge-mode').textContent = 'ハード';
+    }
+
+    const randIdx = Math.floor(Math.random() * candidates.length);
+    quizTargetPokemon = candidates[randIdx];
+
+    document.getElementById('quiz-mode-select-screen').classList.add('hidden');
+    document.getElementById('quiz-playing-screen').classList.remove('hidden');
+    document.getElementById('quiz-result-screen').classList.add('hidden');
+
+    renderQuizHearts();
+    const input = document.getElementById('quiz-guess-input');
+    input.value = '';
+    const errBox = document.getElementById('quiz-input-error');
+    if (errBox) errBox.classList.add('hidden');
+
+    renderQuizHistory();
+
+    // 開始時に正解ポケモンのメロディを再生
+    setTimeout(() => {
+        playQuizTargetMelody();
+        input.focus();
+    }, 400);
+}
+
+function restartQuizSameMode() {
+    startQuiz(quizCurrentMode);
+}
+
+function renderQuizHearts() {
+    const container = document.getElementById('quiz-heart-container');
+    const remainingEl = document.getElementById('quiz-remaining-attempts');
+    if (remainingEl) remainingEl.textContent = quizRemainingAttempts;
+
+    if (!container) return;
+    container.innerHTML = '';
+    for (let i = 0; i < QUIZ_MAX_ATTEMPTS; i++) {
+        const heart = document.createElement('i');
+        if (i < quizRemainingAttempts) {
+            heart.className = 'fa-solid fa-heart text-rose-500 drop-shadow-[0_0_8px_rgba(244,63,94,0.6)] transition-all';
+        } else {
+            heart.className = 'fa-regular fa-heart text-slate-700 transition-all';
+        }
+        container.appendChild(heart);
+    }
+}
+
+function playQuizTargetMelody() {
+    if (!quizTargetPokemon) return;
+    const btn = document.getElementById('quiz-play-target-btn');
+    if (btn) {
+        btn.classList.add('ring-4', 'ring-amber-400/60');
+        setTimeout(() => btn.classList.remove('ring-4', 'ring-amber-400/60'), 1800);
+    }
+    triggerQuizWave(2.6);
+    playStatMelody(quizTargetPokemon);
+}
+
+function handleQuizSubmit(e) {
+    e.preventDefault();
+    const input = document.getElementById('quiz-guess-input');
+    const errBox = document.getElementById('quiz-input-error');
+    const errText = document.getElementById('quiz-input-error-text');
+    const rawVal = (input.value || '').trim();
+    if (!rawVal) return;
+
+    errBox.classList.add('hidden');
+
+    const queryKata = toKatakana(rawVal).toLowerCase();
+    const queryHira = toHiragana(rawVal).toLowerCase();
+
+    function normalizeName(name) {
+        return (name || '').toLowerCase().replace(/\s+/g, '').replace(/[（\(\)）]/g, '');
+    }
+
+    const normKata = normalizeName(queryKata);
+    const normHira = normalizeName(queryHira);
+
+    const found = pokemonList.find(p => {
+        const pNorm = normalizeName(p.name);
+        const pNormHira = toHiragana(pNorm);
+        const pNormKata = toKatakana(pNorm);
+        return pNorm === normKata || pNorm === normHira || 
+               pNormHira === normHira || pNormKata === normKata ||
+               (p.rawName && p.rawName.toLowerCase() === rawVal.toLowerCase());
+    });
+
+    if (!found) {
+        if (errText) errText.textContent = `「${rawVal}」というポケモンは見つかりませんでした。正式名を入力してください。`;
+        errBox.classList.remove('hidden');
+        return;
+    }
+
+    if (quizGuessedList.some(g => g.id === found.id)) {
+        if (errText) errText.textContent = `「${found.name}」はすでに回答済みです。`;
+        errBox.classList.remove('hidden');
+        return;
+    }
+
+    input.value = '';
+
+    const isCorrect = (found.id === quizTargetPokemon.id) || 
+                      (found.baseId === quizTargetPokemon.baseId && found.name === quizTargetPokemon.name);
+
+    if (isCorrect) {
+        finishQuiz(true);
+        return;
+    }
+
+    quizRemainingAttempts--;
+    quizGuessedList.unshift(found);
+    renderQuizHearts();
+    renderQuizHistory();
+
+    triggerQuizWave(2.4);
+    playStatMelody(found);
+
+    if (quizRemainingAttempts <= 0) {
+        finishQuiz(false);
+    }
+}
+
+function renderQuizHistory() {
+    const list = document.getElementById('quiz-history-list');
+    const countEl = document.getElementById('quiz-history-count');
+    if (countEl) countEl.textContent = `${quizGuessedList.length} / ${QUIZ_MAX_ATTEMPTS} 試行`;
+
+    if (!list) return;
+
+    if (quizGuessedList.length === 0) {
+        list.innerHTML = `
+            <div id="quiz-history-empty" class="text-center py-10 bg-slate-900/50 rounded-2xl border border-dashed border-slate-800 text-slate-500 text-xs">
+                回答すると、そのポケモンの音とステータス値が表示され、正解との違いを聴き比べることができます。
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = quizGuessedList.map((p, idx) => {
+        const displayId = (p.baseId || p.id).toString().padStart(4, '0');
+        const badge = getFormBadgeHtml(p);
+        const diffTotal = p.total - quizTargetPokemon.total;
+        let diffBadge = '';
+        if (diffTotal > 0) {
+            diffBadge = `<span class="px-2 py-0.5 rounded-md text-[11px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/30">合計 ${p.total} (正解より +${diffTotal})</span>`;
+        } else if (diffTotal < 0) {
+            diffBadge = `<span class="px-2 py-0.5 rounded-md text-[11px] font-black bg-sky-500/20 text-sky-300 border border-sky-500/30">合計 ${p.total} (正解より ${diffTotal})</span>`;
+        } else {
+            diffBadge = `<span class="px-2 py-0.5 rounded-md text-[11px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">合計 ${p.total} (正解と同値!)</span>`;
+        }
+
+        return `
+            <div class="bg-slate-900/90 rounded-2xl p-4 border border-slate-800 shadow-md flex flex-col gap-3 transition-all hover:border-slate-700">
+                <div class="flex justify-between items-center flex-wrap gap-2">
+                    <div class="flex items-center gap-3">
+                        <span class="text-[10px] font-black tracking-wider text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-md">
+                            #${quizGuessedList.length - idx} 不正解
+                        </span>
+                        <img src="${p.image}" class="w-10 h-10 object-contain drop-shadow" onerror="this.src='https://placehold.co/40x40/f1f5f1/94a3b8?text=?'">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-xs text-slate-500 font-bold">#${displayId}</span>
+                            <span class="text-sm font-black text-white">${p.name}</span>
+                            ${badge}
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        ${diffBadge}
+                        <button type="button" onclick="playGuessedSound(${p.id})"
+                            class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-white rounded-xl text-xs font-bold shadow-sm border border-slate-700 flex items-center gap-1.5 cursor-pointer transition-all hover:scale-105 active:scale-95">
+                            <i class="fa-solid fa-volume-high"></i>
+                            <span>この音を聴く</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stat Comparison Grid -->
+                <div class="grid grid-cols-6 gap-1.5 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80 text-center text-[10px]">
+                    <div>
+                        <div class="text-slate-500 font-bold">HP</div>
+                        <div class="text-white font-black text-xs">${p.hp}</div>
+                    </div>
+                    <div>
+                        <div class="text-slate-500 font-bold">こうげき</div>
+                        <div class="text-white font-black text-xs">${p.atk}</div>
+                    </div>
+                    <div>
+                        <div class="text-slate-500 font-bold">ぼうぎょ</div>
+                        <div class="text-white font-black text-xs">${p.def}</div>
+                    </div>
+                    <div>
+                        <div class="text-slate-500 font-bold">とくこう</div>
+                        <div class="text-white font-black text-xs">${p.spa}</div>
+                    </div>
+                    <div>
+                        <div class="text-slate-500 font-bold">とくぼう</div>
+                        <div class="text-white font-black text-xs">${p.spd}</div>
+                    </div>
+                    <div>
+                        <div class="text-slate-500 font-bold">すばやさ</div>
+                        <div class="text-white font-black text-xs">${p.spe}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function playGuessedSound(id) {
+    const p = pokemonList.find(item => item.id === id);
+    if (p) {
+        triggerQuizWave(2.4);
+        playStatMelody(p);
+    }
+}
+
+function finishQuiz(isWin) {
+    document.getElementById('quiz-playing-screen').classList.add('hidden');
+    const resultScreen = document.getElementById('quiz-result-screen');
+    resultScreen.classList.remove('hidden');
+
+    const iconWrap = document.getElementById('quiz-result-icon-wrap');
+    const title = document.getElementById('quiz-result-title');
+    const desc = document.getElementById('quiz-result-desc');
+    const card = document.getElementById('quiz-result-pokemon-card');
+
+    const p = quizTargetPokemon;
+    const badge = getFormBadgeHtml(p);
+    const displayId = (p.baseId || p.id).toString().padStart(4, '0');
+
+    if (isWin) {
+        iconWrap.className = 'w-24 h-24 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-2xl bg-emerald-500/20 text-emerald-400 border-2 border-emerald-500/50 shadow-emerald-500/20 animate-bounce';
+        iconWrap.innerHTML = '<i class="fa-solid fa-crown text-amber-400"></i>';
+        title.className = 'text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-300';
+        title.textContent = '正解！お見事です！';
+        const attemptsUsed = QUIZ_MAX_ATTEMPTS - quizRemainingAttempts + 1;
+        desc.textContent = `${attemptsUsed}回目の回答で見事正解のポケモンを言い当てました！`;
+    } else {
+        iconWrap.className = 'w-24 h-24 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-2xl bg-rose-500/20 text-rose-400 border-2 border-rose-500/50 shadow-rose-500/20';
+        iconWrap.innerHTML = '<i class="fa-solid fa-skull"></i>';
+        title.className = 'text-2xl sm:text-3xl font-black text-rose-400';
+        title.textContent = 'GAME OVER...';
+        desc.textContent = '10回以内に正解できませんでした。正解はこちらのポケモンでした：';
+    }
+
+    card.innerHTML = `
+        <div class="relative mx-auto sm:mx-0 flex-shrink-0">
+            <div class="w-32 h-32 rounded-2xl bg-slate-950 flex items-center justify-center border border-slate-800 p-2 shadow-inner">
+                <img src="${p.image}" alt="${p.name}" class="w-28 h-28 object-contain drop-shadow-xl" onerror="this.src='https://placehold.co/120x120/1e293b/94a3b8?text=?'">
+            </div>
+        </div>
+        <div class="flex flex-col gap-2 flex-grow w-full">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-black text-slate-500">#${displayId}</span>
+                ${badge}
+            </div>
+            <h4 class="text-xl sm:text-2xl font-black text-white">${p.name}</h4>
+            <div class="flex gap-1.5 flex-wrap">
+                ${p.types.map(t => {
+                    const col = typeColors[t] || { bg: 'bg-slate-500', text: 'text-white' };
+                    return `<span class="px-2.5 py-0.5 rounded-md text-xs font-bold ${col.bg} ${col.text}">${t}</span>`;
+                }).join('')}
+            </div>
+            <div class="bg-slate-950/80 rounded-xl p-3 border border-slate-800 text-xs mt-1">
+                <div class="flex justify-between items-center pb-1 border-b border-slate-800 text-slate-400">
+                    <span>種族値総合計</span>
+                    <strong class="text-amber-400 font-black text-base">${p.total}</strong>
+                </div>
+                <div class="grid grid-cols-6 gap-1 pt-2 text-center text-[10px]">
+                    <div><span class="text-slate-500 block">H</span><strong class="text-white font-bold">${p.hp}</strong></div>
+                    <div><span class="text-slate-500 block">A</span><strong class="text-white font-bold">${p.atk}</strong></div>
+                    <div><span class="text-slate-500 block">B</span><strong class="text-white font-bold">${p.def}</strong></div>
+                    <div><span class="text-slate-500 block">C</span><strong class="text-white font-bold">${p.spa}</strong></div>
+                    <div><span class="text-slate-500 block">D</span><strong class="text-white font-bold">${p.spd}</strong></div>
+                    <div><span class="text-slate-500 block">S</span><strong class="text-white font-bold">${p.spe}</strong></div>
+                </div>
+            </div>
+            <div class="flex gap-2.5 mt-2">
+                <button type="button" onclick="playStatMelody(quizTargetPokemon)"
+                    class="px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-music"></i>
+                    <span>メロディをもう一度聴く</span>
+                </button>
+            </div>
+        </div>
+    `;
+
+    setTimeout(() => {
+        triggerQuizWave(2.6);
+        playStatMelody(p);
+    }, 400);
+}
