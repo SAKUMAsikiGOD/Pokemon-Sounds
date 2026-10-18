@@ -219,7 +219,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (searchInput && searchInput.value !== val) searchInput.value = val;
         if (stickySearchInput && stickySearchInput.value !== val) stickySearchInput.value = val;
         clearTimeout(searchDebounceTimeout);
-        searchDebounceTimeout = setTimeout(filterAndRenderPokemon, 120);
+        searchDebounceTimeout = setTimeout(() => {
+            filterAndRenderPokemon();
+            if (val && val.trim().length >= 2) {
+                recordAnalyticsLog('SEARCH', { keyword: val.trim() });
+            }
+        }, 350);
     }
 
     if (searchInput) {
@@ -763,6 +768,7 @@ function openDetailModalFromId(id) {
 }
 
 function openDetailModal(p) {
+    recordAnalyticsLog('SELECT', { pokemonName: p.name, pokemonId: p.id, baseId: p.baseId });
     const modal = document.getElementById('detail-modal');
     const content = document.getElementById('modal-content');
 
@@ -1469,3 +1475,249 @@ function finishQuiz(isWin) {
         playStatMelody(p);
     }, 400);
 }
+
+/* ==========================================================================
+   Analytics Logging & Admin Console Logic
+   ========================================================================== */
+
+const ANALYTICS_STORAGE_KEY = 'poketone_analytics_logs';
+const ADMIN_PASS_HASH = '94c5011f0628fa6ea95d5223abf16df989b5c3ffdf6a8fb48512dd517ff15ef2'; // SHA-256 for 'admin1234'
+let isAdminAuthenticated = false;
+
+// SHA-256 ハッシュ計算
+async function sha256(str) {
+    const buffer = new TextEncoder().encode(str);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ログ保存関数
+function recordAnalyticsLog(type, payload = {}) {
+    try {
+        const now = new Date();
+        const dateStr = now.toISOString();
+        const raw = localStorage.getItem(ANALYTICS_STORAGE_KEY);
+        const data = raw ? JSON.parse(raw) : {
+            description: "Pokétone ユーザー操作ログ・アクセス解析データ",
+            createdAt: dateStr,
+            version: "1.0",
+            summary: { totalSearches: 0, totalSelections: 0 },
+            logs: []
+        };
+
+        if (type === 'SEARCH') {
+            data.summary.totalSearches = (data.summary.totalSearches || 0) + 1;
+            data.logs.unshift({
+                timestamp: dateStr,
+                type: 'SEARCH',
+                keyword: payload.keyword || '',
+                pokemonName: '',
+                pokemonId: null,
+                details: `検索キーワード: ${payload.keyword}`
+            });
+        } else if (type === 'SELECT') {
+            data.summary.totalSelections = (data.summary.totalSelections || 0) + 1;
+            data.logs.unshift({
+                timestamp: dateStr,
+                type: 'SELECT',
+                keyword: '',
+                pokemonName: payload.pokemonName || '',
+                pokemonId: payload.pokemonId || null,
+                details: `図鑑選択: ${payload.pokemonName} (#${payload.pokemonId})`
+            });
+        }
+
+        // 直近1000件までに制限してブラウザストレージの圧迫を防止
+        if (data.logs.length > 1000) {
+            data.logs = data.logs.slice(0, 1000);
+        }
+
+        localStorage.setItem(ANALYTICS_STORAGE_KEY, JSON.stringify(data));
+
+        // 管理者画面が開いていればリアルタイム更新
+        if (isAdminAuthenticated) {
+            renderAdminDashboardData();
+        }
+    } catch (e) {
+        console.warn("Analytics log failed:", e);
+    }
+}
+
+// 管理者モーダル開閉
+function openAdminModal() {
+    const modal = document.getElementById('admin-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+
+    const authSec = document.getElementById('admin-auth-section');
+    const dashSec = document.getElementById('admin-dashboard-section');
+    const passInput = document.getElementById('admin-password-input');
+    const errEl = document.getElementById('admin-auth-error');
+    if (errEl) errEl.classList.add('hidden');
+
+    if (isAdminAuthenticated) {
+        if (authSec) authSec.classList.add('hidden');
+        if (dashSec) dashSec.classList.remove('hidden');
+        renderAdminDashboardData();
+    } else {
+        if (authSec) authSec.classList.remove('hidden');
+        if (dashSec) dashSec.classList.add('hidden');
+        if (passInput) {
+            passInput.value = '';
+            setTimeout(() => passInput.focus(), 100);
+        }
+    }
+}
+
+function closeAdminModal() {
+    const modal = document.getElementById('admin-modal');
+    if (modal) modal.classList.add('hidden');
+}
+
+// 管理者ログイン認証
+async function handleAdminLogin(e) {
+    if (e) e.preventDefault();
+    const passInput = document.getElementById('admin-password-input');
+    const errEl = document.getElementById('admin-auth-error');
+    if (!passInput) return;
+
+    const inputVal = passInput.value.trim();
+    const hashed = await sha256(inputVal);
+
+    // パスワード: admin1234
+    if (hashed === ADMIN_PASS_HASH || inputVal === 'admin1234') {
+        isAdminAuthenticated = true;
+        if (errEl) errEl.classList.add('hidden');
+        document.getElementById('admin-auth-section').classList.add('hidden');
+        document.getElementById('admin-dashboard-section').classList.remove('hidden');
+        renderAdminDashboardData();
+    } else {
+        if (errEl) errEl.classList.remove('hidden');
+        passInput.focus();
+    }
+}
+
+// 管理者ダッシュボードの描画
+function renderAdminDashboardData() {
+    const raw = localStorage.getItem(ANALYTICS_STORAGE_KEY);
+    const data = raw ? JSON.parse(raw) : {
+        summary: { totalSearches: 0, totalSelections: 0 },
+        logs: []
+    };
+
+    const sEl = document.getElementById('admin-total-searches');
+    const selEl = document.getElementById('admin-total-selections');
+    const lEl = document.getElementById('admin-total-logs');
+    const tbody = document.getElementById('admin-logs-table-body');
+
+    if (sEl) sEl.textContent = (data.summary.totalSearches || 0).toLocaleString();
+    if (selEl) selEl.textContent = (data.summary.totalSelections || 0).toLocaleString();
+    if (lEl) lEl.textContent = (data.logs.length || 0).toLocaleString();
+
+    if (tbody) {
+        if (!data.logs || data.logs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-8 text-center text-slate-400">記録されたログはまだありません</td></tr>`;
+            return;
+        }
+
+        const recentLogs = data.logs.slice(0, 50);
+        tbody.innerHTML = recentLogs.map(l => {
+            const time = new Date(l.timestamp).toLocaleString('ja-JP');
+            const isSearch = l.type === 'SEARCH';
+            const badge = isSearch
+                ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700">検索</span>`
+                : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">選択</span>`;
+            const content = isSearch
+                ? `<span class="font-bold text-indigo-900">「${escapeHtml(l.keyword)}」</span>`
+                : `<span class="font-bold text-emerald-900">${escapeHtml(l.pokemonName)}</span> <span class="text-slate-400 text-[10px]">(ID: ${l.pokemonId})</span>`;
+
+            return `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-3 py-2 text-slate-500 whitespace-nowrap">${time}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">${badge}</td>
+                    <td class="px-3 py-2 text-slate-800">${content}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+}
+
+// analytics_data.json のダウンロード
+function downloadAnalyticsJson() {
+    const raw = localStorage.getItem(ANALYTICS_STORAGE_KEY);
+    const data = raw ? JSON.parse(raw) : {
+        description: "Pokétone ユーザー操作ログ・アクセス解析データ",
+        createdAt: new Date().toISOString(),
+        version: "1.0",
+        summary: { totalSearches: 0, totalSelections: 0 },
+        logs: []
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `analytics_data.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// CSVダウンロード
+function downloadAnalyticsCsv() {
+    const raw = localStorage.getItem(ANALYTICS_STORAGE_KEY);
+    const data = raw ? JSON.parse(raw) : { logs: [] };
+    const logs = data.logs || [];
+
+    let csv = "日時,種別,キーワード,ポケモン名,ポケモンID,詳細\n";
+    logs.forEach(l => {
+        const time = `"${new Date(l.timestamp).toLocaleString('ja-JP')}"`;
+        const type = `"${l.type}"`;
+        const kw = `"${(l.keyword || '').replace(/"/g, '""')}"`;
+        const pName = `"${(l.pokemonName || '').replace(/"/g, '""')}"`;
+        const pId = l.pokemonId ? `"${l.pokemonId}"` : '""';
+        const details = `"${(l.details || '').replace(/"/g, '""')}"`;
+        csv += `${time},${type},${kw},${pName},${pId},${details}\n`;
+    });
+
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]); // UTF-8 BOM for Excel
+    const blob = new Blob([bom, csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `analytics_logs_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// ログ初期化
+function clearAnalyticsLogs() {
+    if (!confirm('本当に蓄積されたすべてのログを消去しますか？\n（この操作は元に戻せません）')) {
+        return;
+    }
+    const emptyData = {
+        description: "Pokétone ユーザー操作ログ・アクセス解析データ",
+        createdAt: new Date().toISOString(),
+        version: "1.0",
+        summary: { totalSearches: 0, totalSelections: 0 },
+        logs: []
+    };
+    localStorage.setItem(ANALYTICS_STORAGE_KEY, JSON.stringify(emptyData));
+    renderAdminDashboardData();
+}
+
+// HTMLエスケープヘルパー
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
