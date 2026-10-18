@@ -1,0 +1,19 @@
+{
+  "description": "Pokétone ユーザー操作ログ・アクセス解析データ",
+  "createdAt": "2026-10-19T00:00:00.000Z",
+  "version": "1.0",
+  "summary": {
+    "totalSearches": 0,
+    "totalSelections": 0
+  },
+  "logs": [
+    {
+      "timestamp": "2026-10-19T00:00:00.000Z",
+      "type": "INITIALIZE",
+      "keyword": "",
+      "pokemonName": "ミュウ",
+      "pokemonId": 151,
+      "details": "初期データ構造サンプル"
+    }
+  ]
+}
