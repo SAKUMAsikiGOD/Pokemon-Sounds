@@ -1116,13 +1116,13 @@ function playStatMelody(p) {
 })();
 
 // ==========================================
-// Quiz Mode Implementation
+// クイズモード実装ロジック
 // ==========================================
-let quizCurrentMode = 'normal'; // 'normal' | 'hard'
+let quizCurrentMode = 'normal'; // 'normal' (ノーマル) | 'hard' (ハード)
 let quizTargetPokemon = null;
 let quizRemainingAttempts = 10;
 const QUIZ_MAX_ATTEMPTS = 10;
-let quizGuessedList = []; // Array of guessed pokemon objects
+let quizGuessedList = []; // 回答済みポケモンオブジェクトの履歴配列
 
 function openQuizModal() {
     if (pokemonList.length === 0) {
@@ -1223,9 +1223,9 @@ function renderQuizHearts() {
     for (let i = 0; i < QUIZ_MAX_ATTEMPTS; i++) {
         const heart = document.createElement('i');
         if (i < quizRemainingAttempts) {
-            heart.className = 'fa-solid fa-heart text-rose-500 drop-shadow-[0_0_8px_rgba(244,63,94,0.6)] transition-all';
+            heart.className = 'fa-solid fa-heart text-rose-500 transition-all transform hover:scale-110';
         } else {
-            heart.className = 'fa-regular fa-heart text-slate-700 transition-all';
+            heart.className = 'fa-regular fa-heart text-slate-300 transition-all';
         }
         container.appendChild(heart);
     }
@@ -1285,11 +1285,22 @@ function handleQuizSubmit(e) {
 
     input.value = '';
 
-    const isCorrect = (found.id === quizTargetPokemon.id) || 
-                      (found.baseId === quizTargetPokemon.baseId && found.name === quizTargetPokemon.name);
+    // 1. 完全一致（同ポケモン・フォルム）
+    const isExactMatch = (found.id === quizTargetPokemon.id) || 
+                         (found.baseId === quizTargetPokemon.baseId && found.name === quizTargetPokemon.name);
 
-    if (isCorrect) {
-        finishQuiz(true);
+    // 2. 種族値完全一致（リザードンとバクフーン等の同値ポケモン判定）
+    const isSameStats = (
+        found.hp === quizTargetPokemon.hp &&
+        found.atk === quizTargetPokemon.atk &&
+        found.def === quizTargetPokemon.def &&
+        found.spa === quizTargetPokemon.spa &&
+        found.spd === quizTargetPokemon.spd &&
+        found.spe === quizTargetPokemon.spe
+    );
+
+    if (isExactMatch || isSameStats) {
+        finishQuiz(true, found, isSameStats && !isExactMatch);
         return;
     }
 
@@ -1315,7 +1326,7 @@ function renderQuizHistory() {
 
     if (quizGuessedList.length === 0) {
         list.innerHTML = `
-            <div id="quiz-history-empty" class="text-center py-10 bg-slate-900/50 rounded-2xl border border-dashed border-slate-800 text-slate-500 text-xs">
+            <div id="quiz-history-empty" class="text-center py-10 bg-white rounded-2xl border border-dashed border-slate-200 text-slate-400 text-xs shadow-xs">
                 回答すると、そのポケモンの音とステータス値が表示され、正解との違いを聴き比べることができます。
             </div>
         `;
@@ -1328,62 +1339,62 @@ function renderQuizHistory() {
         const diffTotal = p.total - quizTargetPokemon.total;
         let diffBadge = '';
         if (diffTotal > 0) {
-            diffBadge = `<span class="px-2 py-0.5 rounded-md text-[11px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/30">合計 ${p.total} (正解より +${diffTotal})</span>`;
+            diffBadge = `<span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">合計 ${p.total} (正解より +${diffTotal})</span>`;
         } else if (diffTotal < 0) {
-            diffBadge = `<span class="px-2 py-0.5 rounded-md text-[11px] font-black bg-sky-500/20 text-sky-300 border border-sky-500/30">合計 ${p.total} (正解より ${diffTotal})</span>`;
+            diffBadge = `<span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-sky-50 text-sky-700 border border-sky-200">合計 ${p.total} (正解より ${diffTotal})</span>`;
         } else {
-            diffBadge = `<span class="px-2 py-0.5 rounded-md text-[11px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">合計 ${p.total} (正解と同値!)</span>`;
+            diffBadge = `<span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">合計 ${p.total} (正解と同値!)</span>`;
         }
 
         return `
-            <div class="bg-slate-900/90 rounded-2xl p-4 border border-slate-800 shadow-md flex flex-col gap-3 transition-all hover:border-slate-700">
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs flex flex-col gap-3 transition-all hover:border-slate-300">
                 <div class="flex justify-between items-center flex-wrap gap-2">
                     <div class="flex items-center gap-3">
-                        <span class="text-[10px] font-black tracking-wider text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-md">
+                        <span class="text-[10px] font-black tracking-wider text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">
                             #${quizGuessedList.length - idx} 不正解
                         </span>
-                        <img src="${p.image}" class="w-10 h-10 object-contain drop-shadow" onerror="this.src='https://placehold.co/40x40/f1f5f1/94a3b8?text=?'">
+                        <img src="${p.image}" class="w-10 h-10 object-contain drop-shadow-sm" onerror="this.src='https://placehold.co/40x40/f1f5f9/94a3b8?text=?'">
                         <div class="flex items-center gap-1.5 flex-wrap">
-                            <span class="text-xs text-slate-500 font-bold">#${displayId}</span>
-                            <span class="text-sm font-black text-white">${p.name}</span>
+                            <span class="text-xs text-slate-400 font-bold">#${displayId}</span>
+                            <span class="text-sm font-black text-slate-900">${p.name}</span>
                             ${badge}
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
                         ${diffBadge}
                         <button type="button" onclick="playGuessedSound(${p.id})"
-                            class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-white rounded-xl text-xs font-bold shadow-sm border border-slate-700 flex items-center gap-1.5 cursor-pointer transition-all hover:scale-105 active:scale-95">
-                            <i class="fa-solid fa-volume-high"></i>
+                            class="px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold shadow-xs border border-slate-200 flex items-center gap-1.5 cursor-pointer transition-all hover:scale-102 active:scale-98">
+                            <i class="fa-solid fa-volume-high text-rose-500"></i>
                             <span>この音を聴く</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- Stat Comparison Grid -->
-                <div class="grid grid-cols-6 gap-1.5 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80 text-center text-[10px]">
+                <div class="grid grid-cols-6 gap-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-center text-[10px]">
                     <div>
-                        <div class="text-slate-500 font-bold">HP</div>
-                        <div class="text-white font-black text-xs">${p.hp}</div>
+                        <div class="text-slate-400 font-bold">HP</div>
+                        <div class="text-slate-800 font-black text-xs">${p.hp}</div>
                     </div>
                     <div>
-                        <div class="text-slate-500 font-bold">こうげき</div>
-                        <div class="text-white font-black text-xs">${p.atk}</div>
+                        <div class="text-slate-400 font-bold">こうげき</div>
+                        <div class="text-slate-800 font-black text-xs">${p.atk}</div>
                     </div>
                     <div>
-                        <div class="text-slate-500 font-bold">ぼうぎょ</div>
-                        <div class="text-white font-black text-xs">${p.def}</div>
+                        <div class="text-slate-400 font-bold">ぼうぎょ</div>
+                        <div class="text-slate-800 font-black text-xs">${p.def}</div>
                     </div>
                     <div>
-                        <div class="text-slate-500 font-bold">とくこう</div>
-                        <div class="text-white font-black text-xs">${p.spa}</div>
+                        <div class="text-slate-400 font-bold">とくこう</div>
+                        <div class="text-slate-800 font-black text-xs">${p.spa}</div>
                     </div>
                     <div>
-                        <div class="text-slate-500 font-bold">とくぼう</div>
-                        <div class="text-white font-black text-xs">${p.spd}</div>
+                        <div class="text-slate-400 font-bold">とくぼう</div>
+                        <div class="text-slate-800 font-black text-xs">${p.spd}</div>
                     </div>
                     <div>
-                        <div class="text-slate-500 font-bold">すばやさ</div>
-                        <div class="text-white font-black text-xs">${p.spe}</div>
+                        <div class="text-slate-400 font-bold">すばやさ</div>
+                        <div class="text-slate-800 font-black text-xs">${p.spe}</div>
                     </div>
                 </div>
             </div>
@@ -1399,7 +1410,7 @@ function playGuessedSound(id) {
     }
 }
 
-function finishQuiz(isWin) {
+function finishQuiz(isWin, answeredPokemon = null, isSameStatsVariant = false) {
     document.getElementById('quiz-playing-screen').classList.add('hidden');
     const resultScreen = document.getElementById('quiz-result-screen');
     resultScreen.classList.remove('hidden');
@@ -1414,55 +1425,60 @@ function finishQuiz(isWin) {
     const displayId = (p.baseId || p.id).toString().padStart(4, '0');
 
     if (isWin) {
-        iconWrap.className = 'w-24 h-24 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-2xl bg-emerald-500/20 text-emerald-400 border-2 border-emerald-500/50 shadow-emerald-500/20 animate-bounce';
-        iconWrap.innerHTML = '<i class="fa-solid fa-crown text-amber-400"></i>';
-        title.className = 'text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-300';
-        title.textContent = '正解！お見事です！';
+        iconWrap.className = 'w-24 h-24 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-md bg-emerald-50 text-emerald-600 border border-emerald-200 animate-bounce';
+        iconWrap.innerHTML = '<i class="fa-solid fa-crown text-amber-500"></i>';
+        title.className = 'text-2xl sm:text-3xl font-black text-slate-900';
+        title.textContent = '正解！';
         const attemptsUsed = QUIZ_MAX_ATTEMPTS - quizRemainingAttempts + 1;
-        desc.textContent = `${attemptsUsed}回目の回答で見事正解のポケモンを言い当てました！`;
+        
+        if (isSameStatsVariant && answeredPokemon) {
+            desc.textContent = `${attemptsUsed}回目の回答で正解！（「${answeredPokemon.name}」と「${p.name}」は種族値が同じです）`;
+        } else {
+            desc.textContent = `${attemptsUsed}回目の回答で見事正解しました！`;
+        }
     } else {
-        iconWrap.className = 'w-24 h-24 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-2xl bg-rose-500/20 text-rose-400 border-2 border-rose-500/50 shadow-rose-500/20';
+        iconWrap.className = 'w-24 h-24 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-md bg-rose-50 text-rose-600 border border-rose-200';
         iconWrap.innerHTML = '<i class="fa-solid fa-skull"></i>';
-        title.className = 'text-2xl sm:text-3xl font-black text-rose-400';
+        title.className = 'text-2xl sm:text-3xl font-black text-slate-900';
         title.textContent = 'GAME OVER...';
         desc.textContent = '10回以内に正解できませんでした。正解はこちらのポケモンでした：';
     }
 
     card.innerHTML = `
         <div class="relative mx-auto sm:mx-0 flex-shrink-0">
-            <div class="w-32 h-32 rounded-2xl bg-slate-950 flex items-center justify-center border border-slate-800 p-2 shadow-inner">
-                <img src="${p.image}" alt="${p.name}" class="w-28 h-28 object-contain drop-shadow-xl" onerror="this.src='https://placehold.co/120x120/1e293b/94a3b8?text=?'">
+            <div class="w-32 h-32 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-200 p-2 shadow-inner">
+                <img src="${p.image}" alt="${p.name}" class="w-28 h-28 object-contain drop-shadow" onerror="this.src='https://placehold.co/120x120/f8fafc/94a3b8?text=?'">
             </div>
         </div>
         <div class="flex flex-col gap-2 flex-grow w-full">
             <div class="flex items-center gap-2">
-                <span class="text-xs font-black text-slate-500">#${displayId}</span>
+                <span class="text-xs font-black text-slate-400">#${displayId}</span>
                 ${badge}
             </div>
-            <h4 class="text-xl sm:text-2xl font-black text-white">${p.name}</h4>
+            <h4 class="text-xl sm:text-2xl font-black text-slate-900">${p.name}</h4>
             <div class="flex gap-1.5 flex-wrap">
                 ${p.types.map(t => {
                     const col = typeColors[t] || { bg: 'bg-slate-500', text: 'text-white' };
                     return `<span class="px-2.5 py-0.5 rounded-md text-xs font-bold ${col.bg} ${col.text}">${t}</span>`;
                 }).join('')}
             </div>
-            <div class="bg-slate-950/80 rounded-xl p-3 border border-slate-800 text-xs mt-1">
-                <div class="flex justify-between items-center pb-1 border-b border-slate-800 text-slate-400">
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-200 text-xs mt-1">
+                <div class="flex justify-between items-center pb-1 border-b border-slate-200 text-slate-500">
                     <span>種族値総合計</span>
-                    <strong class="text-amber-400 font-black text-base">${p.total}</strong>
+                    <strong class="text-rose-600 font-black text-base">${p.total}</strong>
                 </div>
                 <div class="grid grid-cols-6 gap-1 pt-2 text-center text-[10px]">
-                    <div><span class="text-slate-500 block">H</span><strong class="text-white font-bold">${p.hp}</strong></div>
-                    <div><span class="text-slate-500 block">A</span><strong class="text-white font-bold">${p.atk}</strong></div>
-                    <div><span class="text-slate-500 block">B</span><strong class="text-white font-bold">${p.def}</strong></div>
-                    <div><span class="text-slate-500 block">C</span><strong class="text-white font-bold">${p.spa}</strong></div>
-                    <div><span class="text-slate-500 block">D</span><strong class="text-white font-bold">${p.spd}</strong></div>
-                    <div><span class="text-slate-500 block">S</span><strong class="text-white font-bold">${p.spe}</strong></div>
+                    <div><span class="text-slate-400 block">H</span><strong class="text-slate-800 font-bold">${p.hp}</strong></div>
+                    <div><span class="text-slate-400 block">A</span><strong class="text-slate-800 font-bold">${p.atk}</strong></div>
+                    <div><span class="text-slate-400 block">B</span><strong class="text-slate-800 font-bold">${p.def}</strong></div>
+                    <div><span class="text-slate-400 block">C</span><strong class="text-slate-800 font-bold">${p.spa}</strong></div>
+                    <div><span class="text-slate-400 block">D</span><strong class="text-slate-800 font-bold">${p.spd}</strong></div>
+                    <div><span class="text-slate-400 block">S</span><strong class="text-slate-800 font-bold">${p.spe}</strong></div>
                 </div>
             </div>
             <div class="flex gap-2.5 mt-2">
                 <button type="button" onclick="playStatMelody(quizTargetPokemon)"
-                    class="px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer">
+                    class="px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 cursor-pointer">
                     <i class="fa-solid fa-music"></i>
                     <span>メロディをもう一度聴く</span>
                 </button>
@@ -1477,11 +1493,11 @@ function finishQuiz(isWin) {
 }
 
 /* ==========================================================================
-   Analytics Logging & Admin Console Logic
+   アクセス解析ログ & 管理者コンソール ロジック
    ========================================================================== */
 
 const ANALYTICS_STORAGE_KEY = 'poketone_analytics_logs';
-const ADMIN_PASS_HASH = '94c5011f0628fa6ea95d5223abf16df989b5c3ffdf6a8fb48512dd517ff15ef2'; // SHA-256 for 'admin1234'
+const ADMIN_PASS_HASH = '94c5011f0628fa6ea95d5223abf16df989b5c3ffdf6a8fb48512dd517ff15ef2'; // 'admin1234' のSHA-256ハッシュ値
 let isAdminAuthenticated = false;
 
 // SHA-256 ハッシュ計算
@@ -1682,7 +1698,7 @@ function downloadAnalyticsCsv() {
         csv += `${time},${type},${kw},${pName},${pId},${details}\n`;
     });
 
-    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]); // UTF-8 BOM for Excel
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]); // Excel等での文字化け防止用UTF-8 BOM
     const blob = new Blob([bom, csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
