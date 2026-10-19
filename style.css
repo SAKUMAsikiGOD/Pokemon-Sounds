@@ -62,9 +62,38 @@ body {
 .quiz-wave-bar:nth-child(6) { animation-delay: 0.5s; }
 .quiz-wave-bar:nth-child(7) { animation-delay: 0.2s; }
 
-/* パフォーマンス最適化: 画面外カードのレンダリングスキップ */
+/* パフォーマンス最適化: 画面外カードのレンダリングスキップ & 120fps高速描画 */
+html {
+    scroll-behavior: smooth;
+    text-rendering: optimizeSpeed;
+}
+
 .pokemon-card-item {
     content-visibility: auto;
     contain-intrinsic-size: 0 280px;
+    contain: layout style paint;
+    transform: translateZ(0);
+    will-change: transform, box-shadow;
+    backface-visibility: hidden;
+}
+
+/* 120fps GPUアクセラレーション最適化 */
+.quiz-wave-bar,
+#sticky-search-drawer,
+#sticky-search-toggle,
+#sticky-search-wrapper,
+#detail-modal,
+#quiz-modal {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* ホバー時のGPU変形合成を強制して120Hzディスプレイでのカクつきを完全排除 */
+.hover\:scale-105:hover,
+.hover\:scale-102:hover,
+.hover\:-translate-y-0\.5:hover,
+.hover\:-translate-y-1:hover {
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
 }
 
