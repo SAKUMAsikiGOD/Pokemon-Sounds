@@ -132,11 +132,14 @@ function determineFormInfo(rawName, id, speciesName) {
     const n = rawName.toLowerCase();
     
     // メガシンカ / ゲンシカイキ
+    if (n.includes('-mega-z')) {
+        return { formType: 'mega', formLabel: 'メガシンカZ', displayName: `メガ${speciesName}Z` };
+    }
     if (n.includes('-mega-x')) {
-        return { formType: 'mega', formLabel: 'メガシンカ', displayName: `メガ${speciesName}X` };
+        return { formType: 'mega', formLabel: 'メガシンカX', displayName: `メガ${speciesName}X` };
     }
     if (n.includes('-mega-y')) {
-        return { formType: 'mega', formLabel: 'メガシンカ', displayName: `メガ${speciesName}Y` };
+        return { formType: 'mega', formLabel: 'メガシンカY', displayName: `メガ${speciesName}Y` };
     }
     if (n.includes('-mega')) {
         return { formType: 'mega', formLabel: 'メガシンカ', displayName: `メガ${speciesName}` };
@@ -307,9 +310,9 @@ function updateFormCounts() {
 }
 
 async function fetchOptimizedPokemonData() {
-    const CACHE_KEY = 'poketone_clean_v2';
-    // 既存キャッシュからキョダイマックス・重複姿を除外し、鳴き声URLを最新リポジトリに自動修復
-    const cached = localStorage.getItem(CACHE_KEY) || localStorage.getItem('poketone_clean_v1') || localStorage.getItem('pokestats_master_v1351_all_forms');
+    const CACHE_KEY = 'poketone_clean_v3';
+    // 既存キャッシュからキョダイマックス・重複姿を除外し、Zメガや最新命名規則を自動反映
+    const cached = localStorage.getItem(CACHE_KEY) || localStorage.getItem('poketone_clean_v2') || localStorage.getItem('poketone_clean_v1') || localStorage.getItem('pokestats_master_v1351_all_forms');
     if (cached) {
         try {
             const rawList = JSON.parse(cached);
@@ -318,6 +321,13 @@ async function fetchOptimizedPokemonData() {
                 .map(p => {
                     if (p.cry && p.cry.includes('/sprites/pokemon/latest/')) {
                         p.cry = p.cry.replace('/sprites/pokemon/latest/', '/cries/pokemon/latest/');
+                    }
+                    // rawNameが存在する場合、メガZなどの最新フォルム判定を再適用
+                    if (p.rawName) {
+                        const parsed = determineFormInfo(p.rawName, p.id, p._baseSpeciesName || p.name.replace(/^(メガ|ゲンシ)/, '').replace(/ (アローラ|ガラル|ヒスイ|パルデア).*$/, '').replace(/[XYZ]$/, ''));
+                        p.formType = parsed.formType;
+                        p.formLabel = parsed.formLabel;
+                        p.name = parsed.displayName;
                     }
                     return p;
                 });
@@ -657,7 +667,15 @@ function filterAndRenderPokemon() {
 
 function getFormBadgeHtml(p) {
     if (p.formType === 'mega') {
-        return `<span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-xs"><i class="fa-solid fa-dna mr-0.5"></i>${p.formLabel}</span>`;
+        let grad = "from-purple-600 to-pink-600";
+        if (p.formLabel.includes('Z')) {
+            grad = "from-emerald-600 to-teal-500";
+        } else if (p.formLabel.includes('X')) {
+            grad = "from-indigo-600 to-blue-500";
+        } else if (p.formLabel.includes('Y')) {
+            grad = "from-amber-600 to-rose-500";
+        }
+        return `<span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-gradient-to-r ${grad} text-white shadow-xs"><i class="fa-solid fa-dna mr-0.5"></i>${p.formLabel}</span>`;
     }
     if (p.formType === 'regional') {
         let col = "from-sky-500 to-blue-600";
