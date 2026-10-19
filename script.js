@@ -74,7 +74,7 @@ let currentFilteredList = [];
 let infiniteScrollObserver = null;
 let searchDebounceTimeout = null;
 
-// 除外判定：キョダイマックス、ピカチュウ/イーブイ/コライドン/ミライドンの不要な姿、重複アローラ姿(totem)、パルデアケンタロスの重複等
+// 除外判定：キョダイマックス、ピカチュウ/イーブイ/コライドン/ミライドンの不要な姿、重複アローラ姿(totem)、パルデアケンタロスの重複、ノココッチ等同種族値の姿違い重複等
 function shouldExcludePokemon(rawName, id, baseId) {
     const n = (rawName || '').toLowerCase();
 
@@ -113,6 +113,56 @@ function shouldExcludePokemon(rawName, id, baseId) {
     // tauros-paldea-combat-breed (ID 10250) のみを「ケンタロス (パルデアのすがた)」として残し、
     // blaze-breed (ID 10251) と aqua-breed (ID 10252) は重複・区別しづらいため除外
     if (n.includes('tauros-paldea-blaze') || n.includes('tauros-paldea-aqua')) {
+        return true;
+    }
+
+    // 8. ノココッチの姿違い統一 (ふたふしフォルム ID 982 を残し、みつふしフォルム ID 10255 を除外)
+    if (n.includes('dudunsparce-three-segment') || id === 10255) {
+        return true;
+    }
+
+    // 9. イッカネズミの姿違い統一 (4ひきかぞく ID 925 を残し、3びきかぞく ID 10257 を除外)
+    if (n.includes('maushold-family-of-three') || id === 10257) {
+        return true;
+    }
+
+    // 10. シャリタツの姿違い統一 (そったすがた ID 978, 10322 を残し、たれた/のびた姿 ID 10258, 10259, 10323, 10324 を除外)
+    if (n.includes('tatsugiri-droopy') || n.includes('tatsugiri-stretchy') || id === 10258 || id === 10259 || id === 10323 || id === 10324) {
+        return true;
+    }
+
+    // 11. イキリンコの色違い姿統一 (みどりのすがお ID 931 を残し、あお/きいろ/しろ ID 10260-10262 を除外)
+    if (n.includes('squawkabilly-blue') || n.includes('squawkabilly-yellow') || n.includes('squawkabilly-white') || (id >= 10260 && id <= 10262)) {
+        return true;
+    }
+
+    // 12. バスラオのすじ違い統一 (あかすじ ID 550 を残し、あおすじ ID 10016 / しろすじ ID 10247 を除外)
+    if (n.includes('basculin-blue') || n.includes('basculin-white') || id === 10016 || id === 10247) {
+        return true;
+    }
+
+    // 13. メテノの同値カラーバリエーション除外 (流星ID 774 と コアID 10136 のみを残す)
+    if (n.startsWith('minior-') && (n.includes('-meteor') || (id >= 10130 && id <= 10142)) && id !== 774 && id !== 10136) {
+        return true;
+    }
+
+    // 14. マギアナ (500年前のすがた) の重複除外 (ID 10147, 10318)
+    if (n.includes('magearna-original') || id === 10147 || id === 10318) {
+        return true;
+    }
+
+    // 15. ザルード (とうちゃん) の重複除外 (ID 10192)
+    if (n.includes('zarude-dada') || id === 10192) {
+        return true;
+    }
+
+    // 16. ニャオニクス (メス) の重複除外 (種族値がオスID 678と同一のため ID 10025, 10326 を除外)
+    if (n.includes('meowstic-female') || id === 10025 || id === 10326) {
+        return true;
+    }
+
+    // 17. ストリンダー (ローなすがた) の重複除外 (種族値がハイID 849と同一のため ID 10184 を除外)
+    if (n.includes('toxtricity-low-key') || id === 10184) {
         return true;
     }
 
@@ -310,9 +360,9 @@ function updateFormCounts() {
 }
 
 async function fetchOptimizedPokemonData() {
-    const CACHE_KEY = 'poketone_clean_v3';
-    // 既存キャッシュからキョダイマックス・重複姿を除外し、Zメガや最新命名規則を自動反映
-    const cached = localStorage.getItem(CACHE_KEY) || localStorage.getItem('poketone_clean_v2') || localStorage.getItem('poketone_clean_v1') || localStorage.getItem('pokestats_master_v1351_all_forms');
+    const CACHE_KEY = 'poketone_clean_v4';
+    // 既存キャッシュからキョダイマックス・重複姿・ノココッチ等姿違い重複を除外し、Zメガや最新命名規則を自動反映
+    const cached = localStorage.getItem(CACHE_KEY) || localStorage.getItem('poketone_clean_v3') || localStorage.getItem('poketone_clean_v2') || localStorage.getItem('poketone_clean_v1') || localStorage.getItem('pokestats_master_v1351_all_forms');
     if (cached) {
         try {
             const rawList = JSON.parse(cached);
@@ -1307,7 +1357,10 @@ function handleQuizSubmit(e) {
     const isExactMatch = (found.id === quizTargetPokemon.id) || 
                          (found.baseId === quizTargetPokemon.baseId && found.name === quizTargetPokemon.name);
 
-    // 2. 種族値完全一致（リザードンとバクフーン等の同値ポケモン判定）
+    // 2. 種族値完全一致判定（6ステータスが全て同値）
+    // リザードンとバクフーン、コラッタとアローラコラッタ、ロコンとアローラロコンなど、
+    // 種族値（メロディ）が完全に同一のポケモンであればどちらを答えても正解
+    // ※ メガシンカと通常は種族値が異なるため明確に区別されます
     const isSameStats = (
         found.hp === quizTargetPokemon.hp &&
         found.atk === quizTargetPokemon.atk &&
@@ -1449,8 +1502,8 @@ function finishQuiz(isWin, answeredPokemon = null, isSameStatsVariant = false) {
         title.textContent = '正解！';
         const attemptsUsed = QUIZ_MAX_ATTEMPTS - quizRemainingAttempts + 1;
         
-        if (isSameStatsVariant && answeredPokemon) {
-            desc.textContent = `${attemptsUsed}回目の回答で正解！（「${answeredPokemon.name}」と「${p.name}」は種族値が同じです）`;
+        if (isSameStatsVariant && answeredPokemon && answeredPokemon.name !== p.name) {
+            desc.textContent = `${attemptsUsed}回目の回答で見事正解しました！（「${answeredPokemon.name}」と「${p.name}」は種族値が同じです）`;
         } else {
             desc.textContent = `${attemptsUsed}回目の回答で見事正解しました！`;
         }
