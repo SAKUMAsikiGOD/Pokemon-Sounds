@@ -21,7 +21,7 @@ body {
     background: #94a3b8;
 }
 
-/* Sticky Search Wrapper & Floating Trigger */
+/* 固定検索バーラッパー & フローティングトリガー */
 #sticky-search-wrapper {
     top: var(--header-h, 0px);
 }
@@ -31,7 +31,7 @@ body {
     opacity: 1;
 }
 
-/* Accordion Drawer open state */
+/* アコーディオン式ドロワーの展開状態 */
 #sticky-search-drawer.open {
     max-height: 85vh;
     opacity: 1;
@@ -41,7 +41,7 @@ body {
     transform: rotate(180deg);
 }
 
-/* Quiz Visualizer Animation */
+/* クイズ用サウンドビジュアライザーのアニメーション */
 @keyframes waveAnimation {
     0%, 100% {
         transform: scaleY(0.3);
@@ -62,7 +62,7 @@ body {
 .quiz-wave-bar:nth-child(6) { animation-delay: 0.5s; }
 .quiz-wave-bar:nth-child(7) { animation-delay: 0.2s; }
 
-/* Performance Optimizations: Skip off-screen rendering */
+/* パフォーマンス最適化: 画面外カードのレンダリングスキップ */
 .pokemon-card-item {
     content-visibility: auto;
     contain-intrinsic-size: 0 280px;
