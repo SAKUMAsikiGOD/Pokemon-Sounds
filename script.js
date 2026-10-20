@@ -169,84 +169,100 @@ function shouldExcludePokemon(rawName, id, baseId) {
     return false;
 }
 
+// ポケモンの基本種族名（メガ、ゲンシ、リージョン名、フォルム名などの付加情報を除去した純粋な名前）を取得
+function cleanBaseSpeciesName(name) {
+    if (!name) return '';
+    let s = String(name);
+    // メガ、ゲンシを先頭から除去
+    s = s.replace(/^(メガ|ゲンシ)/, '');
+    // 末尾のメガシンカ記号 (X, Y, Z) を除去
+    s = s.replace(/[XYZ]$/, '');
+    // 半角・全角の丸括弧以降（「 (ヒスイのすがた)」「（ガラルのすがた）」等）をすべて一括除去
+    // 複数回連結されている場合でも、最初の丸括弧から後ろをすべて切り落とす
+    s = s.replace(/[\s\u3000]*[\(\uff08].*$/, '');
+    return s.trim();
+}
+
 // フォルム情報の自動判定
 function determineFormInfo(rawName, id, speciesName) {
+    const baseName = cleanBaseSpeciesName(speciesName);
+
     if (id <= 1025) {
         return {
             formType: 'normal',
             formLabel: '通常',
-            displayName: speciesName
+            displayName: baseName || speciesName
         };
     }
 
-    const n = rawName.toLowerCase();
+    const n = (rawName || '').toLowerCase();
     
     // メガシンカ / ゲンシカイキ
     if (n.includes('-mega-z')) {
-        return { formType: 'mega', formLabel: 'メガシンカZ', displayName: `メガ${speciesName}Z` };
+        return { formType: 'mega', formLabel: 'メガシンカZ', displayName: `メガ${baseName}Z` };
     }
     if (n.includes('-mega-x')) {
-        return { formType: 'mega', formLabel: 'メガシンカX', displayName: `メガ${speciesName}X` };
+        return { formType: 'mega', formLabel: 'メガシンカX', displayName: `メガ${baseName}X` };
     }
     if (n.includes('-mega-y')) {
-        return { formType: 'mega', formLabel: 'メガシンカY', displayName: `メガ${speciesName}Y` };
+        return { formType: 'mega', formLabel: 'メガシンカY', displayName: `メガ${baseName}Y` };
     }
     if (n.includes('-mega')) {
-        return { formType: 'mega', formLabel: 'メガシンカ', displayName: `メガ${speciesName}` };
+        return { formType: 'mega', formLabel: 'メガシンカ', displayName: `メガ${baseName}` };
     }
     if (n.includes('-primal')) {
-        return { formType: 'mega', formLabel: 'ゲンシカイキ', displayName: `ゲンシ${speciesName}` };
+        return { formType: 'mega', formLabel: 'ゲンシカイキ', displayName: `ゲンシ${baseName}` };
     }
 
     // リージョンフォーム
     if (n.includes('-alola')) {
-        return { formType: 'regional', formLabel: 'アローラ', displayName: `${speciesName} (アローラのすがた)` };
+        return { formType: 'regional', formLabel: 'アローラ', displayName: `${baseName} (アローラのすがた)` };
     }
     if (n.includes('-galar')) {
-        return { formType: 'regional', formLabel: 'ガラル', displayName: `${speciesName} (ガラルのすがた)` };
+        return { formType: 'regional', formLabel: 'ガラル', displayName: `${baseName} (ガラルのすがた)` };
     }
     if (n.includes('-hisui')) {
-        return { formType: 'regional', formLabel: 'ヒスイ', displayName: `${speciesName} (ヒスイのすがた)` };
+        return { formType: 'regional', formLabel: 'ヒスイ', displayName: `${baseName} (ヒスイのすがた)` };
     }
     if (n.includes('-paldea')) {
-        return { formType: 'regional', formLabel: 'パルデア', displayName: `${speciesName} (パルデアのすがた)` };
+        return { formType: 'regional', formLabel: 'パルデア', displayName: `${baseName} (パルデアのすがた)` };
     }
 
     // キョダイマックス
     if (n.includes('-gmax')) {
-        return { formType: 'other', formLabel: 'キョダイマックス', displayName: `${speciesName} (キョダイマックス)` };
+        return { formType: 'other', formLabel: 'キョダイマックス', displayName: `${baseName} (キョダイマックス)` };
     }
 
     // その他の形態
     if (n.includes('-origin')) {
-        return { formType: 'other', formLabel: 'オリジン', displayName: `${speciesName} (オリジンフォルム)` };
+        return { formType: 'other', formLabel: 'オリジン', displayName: `${baseName} (オリジンフォルム)` };
     }
     if (n.includes('-therian')) {
-        return { formType: 'other', formLabel: 'れいじゅう', displayName: `${speciesName} (れいじゅうフォルム)` };
+        return { formType: 'other', formLabel: 'れいじゅう', displayName: `${baseName} (れいじゅうフォルム)` };
     }
     if (n.includes('-crowned')) {
-        return { formType: 'other', formLabel: 'けんのおう/たてのおう', displayName: `${speciesName} (けんのおう/たてのおう)` };
+        return { formType: 'other', formLabel: 'けんのおう/たてのおう', displayName: `${baseName} (けんのおう/たてのおう)` };
     }
     if (n.includes('-attack')) {
-        return { formType: 'other', formLabel: 'アタック', displayName: `${speciesName} (アタックフォルム)` };
+        return { formType: 'other', formLabel: 'アタック', displayName: `${baseName} (アタックフォルム)` };
     }
     if (n.includes('-defense')) {
-        return { formType: 'other', formLabel: 'ディフェンス', displayName: `${speciesName} (ディフェンスフォルム)` };
+        return { formType: 'other', formLabel: 'ディフェンス', displayName: `${baseName} (ディフェンスフォルム)` };
     }
     if (n.includes('-speed')) {
-        return { formType: 'other', formLabel: 'スピード', displayName: `${speciesName} (スピードフォルム)` };
+        return { formType: 'other', formLabel: 'スピード', displayName: `${baseName} (スピードフォルム)` };
     }
-    if (n.includes('-wash')) return { formType: 'other', formLabel: 'ウォッシュ', displayName: `${speciesName} (ウォッシュ)` };
-    if (n.includes('-heat')) return { formType: 'other', formLabel: 'ヒート', displayName: `${speciesName} (ヒート)` };
-    if (n.includes('-frost')) return { formType: 'other', formLabel: 'フロスト', displayName: `${speciesName} (フロスト)` };
-    if (n.includes('-fan')) return { formType: 'other', formLabel: 'スピン', displayName: `${speciesName} (スピン)` };
-    if (n.includes('-mow')) return { formType: 'other', formLabel: 'カット', displayName: `${speciesName} (カット)` };
+    if (n.includes('-wash')) return { formType: 'other', formLabel: 'ウォッシュ', displayName: `${baseName} (ウォッシュ)` };
+    if (n.includes('-heat')) return { formType: 'other', formLabel: 'ヒート', displayName: `${baseName} (ヒート)` };
+    if (n.includes('-frost')) return { formType: 'other', formLabel: 'フロスト', displayName: `${baseName} (フロスト)` };
+    if (n.includes('-fan')) return { formType: 'other', formLabel: 'スピン', displayName: `${baseName} (スピン)` };
+    if (n.includes('-mow')) return { formType: 'other', formLabel: 'カット', displayName: `${baseName} (カット)` };
 
     const suffix = rawName.split('-').slice(1).join(' ');
     return {
         formType: 'other',
         formLabel: suffix || '別フォルム',
-        displayName: suffix ? `${speciesName} (${suffix})` : speciesName
+        displayName: suffix ? `${baseName} (${suffix})` : baseName
     };
 }
 
@@ -360,9 +376,9 @@ function updateFormCounts() {
 }
 
 async function fetchOptimizedPokemonData() {
-    const CACHE_KEY = 'poketone_clean_v4';
+    const CACHE_KEY = 'poketone_clean_v5';
     // 既存キャッシュからキョダイマックス・重複姿・ノココッチ等姿違い重複を除外し、Zメガや最新命名規則を自動反映
-    const cached = localStorage.getItem(CACHE_KEY) || localStorage.getItem('poketone_clean_v3') || localStorage.getItem('poketone_clean_v2') || localStorage.getItem('poketone_clean_v1') || localStorage.getItem('pokestats_master_v1351_all_forms');
+    const cached = localStorage.getItem(CACHE_KEY) || localStorage.getItem('poketone_clean_v4') || localStorage.getItem('poketone_clean_v3') || localStorage.getItem('poketone_clean_v2') || localStorage.getItem('poketone_clean_v1') || localStorage.getItem('pokestats_master_v1351_all_forms');
     if (cached) {
         try {
             const rawList = JSON.parse(cached);
@@ -372,12 +388,16 @@ async function fetchOptimizedPokemonData() {
                     if (p.cry && p.cry.includes('/sprites/pokemon/latest/')) {
                         p.cry = p.cry.replace('/sprites/pokemon/latest/', '/cries/pokemon/latest/');
                     }
+                    const cleanBase = cleanBaseSpeciesName(p._baseSpeciesName || p.name);
+                    p._baseSpeciesName = cleanBase;
                     // rawNameが存在する場合、メガZなどの最新フォルム判定を再適用
                     if (p.rawName) {
-                        const parsed = determineFormInfo(p.rawName, p.id, p._baseSpeciesName || p.name.replace(/^(メガ|ゲンシ)/, '').replace(/ (アローラ|ガラル|ヒスイ|パルデア).*$/, '').replace(/[XYZ]$/, ''));
+                        const parsed = determineFormInfo(p.rawName, p.id, cleanBase);
                         p.formType = parsed.formType;
                         p.formLabel = parsed.formLabel;
                         p.name = parsed.displayName;
+                    } else if (p.formType === 'normal') {
+                        p.name = cleanBase;
                     }
                     return p;
                 });
@@ -493,6 +513,7 @@ async function fetchOptimizedPokemonData() {
                     const pokemonObj = {
                         id,
                         baseId,
+                        _baseSpeciesName: cleanBaseSpeciesName(speciesName),
                         rawName: pData.name,
                         name,
                         formType: formInfo.formType,
