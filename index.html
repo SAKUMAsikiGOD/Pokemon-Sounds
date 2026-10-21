@@ -51,7 +51,7 @@
                     class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-2">
                     <i class="fa-solid fa-database text-red-400"></i>
                     <span>読込済み: <strong id="loaded-count" class="text-white">0</strong> / <span
-                            id="total-target-count">1279</span> 匹</span>
+                            id="total-target-count">1257</span> 匹</span>
                 </div>
             </div>
         </div>
@@ -332,7 +332,7 @@
                         <div>
                             <div class="text-base font-black text-slate-900 group-hover:text-rose-700 transition-colors">ハードモード</div>
                             <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-                                進化前・中間進化・別フォルムを含む全1279匹のポケモンから出題。
+                                進化前・中間進化・別フォルムを含む全1257匹のポケモンから出題。
                             </p>
                         </div>
                         <div class="text-xs font-bold text-rose-600 flex items-center gap-1">
@@ -395,6 +395,12 @@
                             <i class="fa-solid fa-cat text-pink-500"></i>
                             <span>ミュウの基準音 (All 100)</span>
                         </button>
+                        <button type="button" onclick="confirmGiveUpQuiz()"
+                            class="px-4 py-3 bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-2xl text-sm font-bold transition-all border border-slate-200 hover:border-rose-200 flex items-center gap-2 cursor-pointer hover:scale-102 active:scale-98"
+                            title="降参して正解のポケモンを確認する">
+                            <i class="fa-solid fa-flag text-slate-400 group-hover:text-rose-500"></i>
+                            <span>降参する</span>
+                        </button>
                     </div>
                 </div>
 
@@ -411,7 +417,7 @@
                                     <i class="fa-solid fa-magnifying-glass"></i>
                                 </span>
                                 <input type="text" id="quiz-guess-input" autocomplete="off"
-                                    placeholder="ポケモンの名前を入力 (例: リザードン, ぴかちゅう, 25)..."
+                                    placeholder="ポケモンの名前を入力 (例: ヒスイウォーグル, ガラルヤドラン, パルデアケンタロス)..."
                                     class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white focus:border-transparent text-slate-900 text-sm sm:text-base font-bold placeholder-slate-400 transition-all">
                             </div>
                             <button type="submit"
@@ -425,6 +431,11 @@
                             <span id="quiz-input-error-text"></span>
                         </div>
                     </form>
+
+                    <!-- 別の姿・同種族値ポケモンの選択肢パネル -->
+                    <div id="quiz-form-selection-panel" class="hidden mt-1 pt-3 border-t border-slate-100 flex flex-col gap-3">
+                        <!-- 動的生成される選択肢カード群 -->
+                    </div>
                 </div>
 
                 <!-- 回答履歴 & 種族値比較一覧デッキ -->
@@ -501,121 +512,12 @@
         </div>
     </div>
 
-    <!-- 管理者ログ解析モーダル -->
-    <div id="admin-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
-            <!-- モーダルヘッダー -->
-            <div class="p-5 bg-slate-900 text-white flex justify-between items-center">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-indigo-100 shadow-md">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-black tracking-wide">管理者データコンソール</h2>
-                        <p class="text-xs text-slate-400">検索・選択ログ解析 & データエクスポート</p>
-                    </div>
-                </div>
-                <button onclick="closeAdminModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-all cursor-pointer">
-                    <i class="fa-solid fa-xmark text-sm"></i>
-                </button>
-            </div>
-
-            <!-- モーダル本体 -->
-            <div class="p-6 overflow-y-auto flex-1 flex flex-col gap-6 text-slate-800">
-                <!-- パスワード認証セクション（未ログイン時） -->
-                <div id="admin-auth-section" class="flex flex-col items-center justify-center py-8 gap-4">
-                    <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center text-2xl shadow-inner">
-                        <i class="fa-solid fa-lock"></i>
-                    </div>
-                    <div class="text-center">
-                        <h3 class="font-bold text-base text-slate-800">管理者認証</h3>
-                        <p class="text-xs text-slate-500 mt-1">ログデータを閲覧・出力するにはパスワードを入力してください</p>
-                    </div>
-                    <form onsubmit="handleAdminLogin(event)" class="w-full max-w-xs flex flex-col gap-3 mt-2">
-                        <input id="admin-password-input" type="password" placeholder="管理者パスワード"
-                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-                        <button type="submit"
-                            class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all cursor-pointer">
-                            ログインして閲覧
-                        </button>
-                        <p id="admin-auth-error" class="text-xs text-red-500 text-center font-bold hidden">パスワードが間違っています</p>
-                    </form>
-                </div>
-
-                <!-- ダッシュボードセクション（ログイン成功後） -->
-                <div id="admin-dashboard-section" class="flex flex-col gap-5 hidden">
-                    <!-- 統計カード -->
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4">
-                            <span class="text-xs font-bold text-indigo-600 flex items-center gap-1.5"><i class="fa-solid fa-magnifying-glass"></i> 総検索回数</span>
-                            <p id="admin-total-searches" class="text-2xl font-black text-indigo-950 mt-1">0</p>
-                        </div>
-                        <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
-                            <span class="text-xs font-bold text-emerald-600 flex items-center gap-1.5"><i class="fa-solid fa-hand-pointer"></i> ポケモン選択回数</span>
-                            <p id="admin-total-selections" class="text-2xl font-black text-emerald-950 mt-1">0</p>
-                        </div>
-                        <div class="bg-purple-50 border border-purple-100 rounded-2xl p-4 col-span-2 sm:col-span-1">
-                            <span class="text-xs font-bold text-purple-600 flex items-center gap-1.5"><i class="fa-solid fa-database"></i> 蓄積ログ件数</span>
-                            <p id="admin-total-logs" class="text-2xl font-black text-purple-950 mt-1">0</p>
-                        </div>
-                    </div>
-
-                    <!-- アクション操作バー -->
-                    <div class="flex items-center justify-between gap-2 flex-wrap bg-slate-50 p-3 rounded-2xl border border-slate-200">
-                        <div class="flex items-center gap-2">
-                            <button onclick="downloadAnalyticsJson()"
-                                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer hover:scale-102">
-                                <i class="fa-solid fa-file-arrow-down"></i>
-                                <span>analytics_data.json をダウンロード</span>
-                            </button>
-                            <button onclick="downloadAnalyticsCsv()"
-                                class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer hover:scale-102">
-                                <i class="fa-solid fa-file-csv"></i>
-                                <span>CSV出力</span>
-                            </button>
-                        </div>
-                        <button onclick="clearAnalyticsLogs()"
-                            class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-bold rounded-xl transition-all cursor-pointer">
-                            <i class="fa-solid fa-trash-can mr-1"></i>ログ初期化
-                        </button>
-                    </div>
-
-                    <!-- 最近のアクティビティログテーブル -->
-                    <div class="flex flex-col gap-2">
-                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
-                            <span>最近のアクティビティログ (直近50件)</span>
-                            <span class="text-[11px] lowercase text-slate-400 font-normal">リアルタイム更新</span>
-                        </h4>
-                        <div class="border border-slate-200 rounded-2xl overflow-hidden max-h-64 overflow-y-auto bg-white shadow-inner">
-                            <table class="w-full text-xs text-left">
-                                <thead class="bg-slate-100 text-slate-600 sticky top-0 border-b border-slate-200 font-bold">
-                                    <tr>
-                                        <th class="px-3 py-2">日時</th>
-                                        <th class="px-3 py-2">種別</th>
-                                        <th class="px-3 py-2">内容・キーワード / ポケモン</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-logs-table-body" class="divide-y divide-slate-100 font-mono text-slate-700">
-                                    <!-- 動的ログ行が挿入されます -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <p>© 2026 Pokétone. Data provided by PokéAPI (pokeapi.co).</p>
             <div class="flex items-center gap-4">
                 <span class="flex items-center gap-1"><i class="fa-solid fa-circle-check text-emerald-500"
                         id="footer-status"></i> キャッシュ連携中</span>
-                <button onclick="openAdminModal()" class="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer text-xs flex items-center gap-1" title="管理者用データコンソール">
-                    <i class="fa-solid fa-lock"></i>
-                    <span>管理コンソール</span>
-                </button>
             </div>
         </div>
     </footer>
