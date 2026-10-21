@@ -39,32 +39,90 @@ const typeEnToJp = {
 
 const EMBEDDED_FALLBACK_POKEMON = [
     // 通常種
-    { id: 1, baseId: 1, name: "フシギダネ", formType: "normal", formLabel: "通常", types: ["くさ", "どく"], hp: 45, atk: 49, def: 49, spa: 65, spd: 65, spe: 45, total: 318, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/1.ogg" },
-    { id: 4, baseId: 4, name: "ヒトカゲ", formType: "normal", formLabel: "通常", types: ["ほのお"], hp: 39, atk: 52, def: 43, spa: 60, spd: 50, spe: 65, total: 309, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/4.ogg" },
-    { id: 6, baseId: 6, name: "リザードン", formType: "normal", formLabel: "通常", types: ["ほのお", "ひこう"], hp: 78, atk: 84, def: 78, spa: 109, spd: 85, spe: 100, total: 534, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/6.ogg" },
-    { id: 7, baseId: 7, name: "ゼニガメ", formType: "normal", formLabel: "通常", types: ["みず"], hp: 44, atk: 48, def: 65, spa: 50, spd: 64, spe: 43, total: 314, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/7.ogg" },
-    { id: 25, baseId: 25, name: "ピカチュウ", formType: "normal", formLabel: "通常", types: ["でんき"], hp: 35, atk: 55, def: 40, spa: 50, spd: 50, spe: 90, total: 320, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/25.ogg" },
-    { id: 133, baseId: 133, name: "イーブイ", formType: "normal", formLabel: "通常", types: ["ノーマル"], hp: 55, atk: 55, def: 50, spa: 45, spd: 65, spe: 55, total: 325, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/133.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/133.ogg" },
-    { id: 150, baseId: 150, name: "ミュウツー", formType: "normal", formLabel: "通常", types: ["エスパー"], hp: 106, atk: 110, def: 90, spa: 154, spd: 90, spe: 130, total: 680, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/150.ogg" },
-    { id: 151, baseId: 151, name: "ミュウ", formType: "normal", formLabel: "通常", types: ["エスパー"], hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100, total: 600, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/151.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/151.ogg" },
+    { id: 1, baseId: 1, name: "フシギダネ", _baseSpeciesName: "フシギダネ", formType: "normal", formLabel: "通常", types: ["くさ", "どく"], hp: 45, atk: 49, def: 49, spa: 65, spd: 65, spe: 45, total: 318, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/1.ogg" },
+    { id: 4, baseId: 4, name: "ヒトカゲ", _baseSpeciesName: "ヒトカゲ", formType: "normal", formLabel: "通常", types: ["ほのお"], hp: 39, atk: 52, def: 43, spa: 60, spd: 50, spe: 65, total: 309, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/4.ogg" },
+    { id: 6, baseId: 6, name: "リザードン", _baseSpeciesName: "リザードン", formType: "normal", formLabel: "通常", types: ["ほのお", "ひこう"], hp: 78, atk: 84, def: 78, spa: 109, spd: 85, spe: 100, total: 534, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/6.ogg" },
+    { id: 7, baseId: 7, name: "ゼニガメ", _baseSpeciesName: "ゼニガメ", formType: "normal", formLabel: "通常", types: ["みず"], hp: 44, atk: 48, def: 65, spa: 50, spd: 64, spe: 43, total: 314, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/7.ogg" },
+    { id: 25, baseId: 25, name: "ピカチュウ", _baseSpeciesName: "ピカチュウ", formType: "normal", formLabel: "通常", types: ["でんき"], hp: 35, atk: 55, def: 40, spa: 50, spd: 50, spe: 90, total: 320, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/25.ogg" },
+    { id: 80, baseId: 80, name: "ヤドラン", _baseSpeciesName: "ヤドラン", formType: "normal", formLabel: "通常", types: ["みず", "エスパー"], hp: 95, atk: 75, def: 110, spa: 100, spd: 80, spe: 30, total: 490, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/80.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/80.ogg" },
+    { id: 128, baseId: 128, name: "ケンタロス", _baseSpeciesName: "ケンタロス", formType: "normal", formLabel: "通常", types: ["ノーマル"], hp: 75, atk: 100, def: 95, spa: 40, spd: 70, spe: 110, total: 490, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/128.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/128.ogg" },
+    { id: 133, baseId: 133, name: "イーブイ", _baseSpeciesName: "イーブイ", formType: "normal", formLabel: "通常", types: ["ノーマル"], hp: 55, atk: 55, def: 50, spa: 45, spd: 65, spe: 55, total: 325, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/133.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/133.ogg" },
+    { id: 150, baseId: 150, name: "ミュウツー", _baseSpeciesName: "ミュウツー", formType: "normal", formLabel: "通常", types: ["エスパー"], hp: 106, atk: 110, def: 90, spa: 154, spd: 90, spe: 130, total: 680, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/150.ogg" },
+    { id: 151, baseId: 151, name: "ミュウ", _baseSpeciesName: "ミュウ", formType: "normal", formLabel: "通常", types: ["エスパー"], hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100, total: 600, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/151.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/151.ogg" },
+    { id: 628, baseId: 628, name: "ウォーグル", _baseSpeciesName: "ウォーグル", formType: "normal", formLabel: "通常", types: ["ノーマル", "ひこう"], hp: 100, atk: 123, def: 75, spa: 57, spd: 75, spe: 80, total: 510, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/628.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/628.ogg" },
+    { id: 706, baseId: 706, name: "ヌメルゴン", _baseSpeciesName: "ヌメルゴン", formType: "normal", formLabel: "通常", types: ["ドラゴン"], hp: 90, atk: 100, def: 70, spa: 110, spd: 150, spe: 80, total: 600, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/706.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/706.ogg" },
     // メガシンカ
-    { id: 10034, baseId: 6, name: "メガリザードンX", formType: "mega", formLabel: "メガシンカ", types: ["ほのお", "ドラゴン"], hp: 78, atk: 130, def: 111, spa: 130, spd: 85, spe: 100, total: 634, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10034.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10034.ogg" },
-    { id: 10035, baseId: 6, name: "メガリザードンY", formType: "mega", formLabel: "メガシンカ", types: ["ほのお", "ひこう"], hp: 78, atk: 104, def: 78, spa: 159, spd: 115, spe: 100, total: 634, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10035.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10035.ogg" },
-    { id: 10044, baseId: 150, name: "メガミュウツーY", formType: "mega", formLabel: "メガシンカ", types: ["エスパー"], hp: 106, atk: 150, def: 70, spa: 194, spd: 120, spe: 140, total: 780, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10044.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10044.ogg" },
-    { id: 10059, baseId: 448, name: "メガルカリオ", formType: "mega", formLabel: "メガシンカ", types: ["かくとう", "はがね"], hp: 70, atk: 145, def: 88, spa: 140, spd: 70, spe: 112, total: 625, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10059.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10059.ogg" },
-    { id: 10038, baseId: 94, name: "メガゲンガー", formType: "mega", formLabel: "メガシンカ", types: ["ゴースト", "どく"], hp: 60, atk: 65, def: 80, spa: 170, spd: 95, spe: 130, total: 600, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10038.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10038.ogg" },
-    // リージョンフォーム
-    { id: 10091, baseId: 19, name: "コラッタ (アローラのすがた)", formType: "regional", formLabel: "アローラ", types: ["あく", "ノーマル"], hp: 30, atk: 56, def: 35, spa: 25, spd: 35, spe: 72, total: 253, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10091.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10091.ogg" },
-    { id: 10100, baseId: 26, name: "ライチュウ (アローラのすがた)", formType: "regional", formLabel: "アローラ", types: ["でんき", "エスパー"], hp: 60, atk: 85, def: 50, spa: 95, spd: 85, spe: 110, total: 485, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10100.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10100.ogg" },
-    { id: 10103, baseId: 37, name: "ロコン (アローラのすがた)", formType: "regional", formLabel: "アローラ", types: ["こおり"], hp: 38, atk: 41, def: 40, spa: 50, spd: 65, spe: 65, total: 299, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10103.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10103.ogg" },
-    { id: 10165, baseId: 263, name: "ジグザグマ (ガラルのすがた)", formType: "regional", formLabel: "ガラル", types: ["あく", "ノーマル"], hp: 38, atk: 30, def: 41, spa: 30, spd: 41, spe: 60, total: 240, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10165.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10165.ogg" },
-    { id: 10238, baseId: 570, name: "ゾロア (ヒスイのすがた)", formType: "regional", formLabel: "ヒスイ", types: ["ノーマル", "ゴースト"], hp: 35, atk: 60, def: 40, spa: 85, spd: 40, spe: 70, total: 330, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10238.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10238.ogg" }
+    { id: 10034, baseId: 6, name: "メガリザードンX", rawName: "charizard-mega-x", _baseSpeciesName: "リザードン", formType: "mega", formLabel: "メガシンカX", types: ["ほのお", "ドラゴン"], hp: 78, atk: 130, def: 111, spa: 130, spd: 85, spe: 100, total: 634, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10034.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10034.ogg" },
+    { id: 10035, baseId: 6, name: "メガリザードンY", rawName: "charizard-mega-y", _baseSpeciesName: "リザードン", formType: "mega", formLabel: "メガシンカY", types: ["ほのお", "ひこう"], hp: 78, atk: 104, def: 78, spa: 159, spd: 115, spe: 100, total: 634, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10035.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10035.ogg" },
+    { id: 10044, baseId: 150, name: "メガミュウツーY", rawName: "mewtwo-mega-y", _baseSpeciesName: "ミュウツー", formType: "mega", formLabel: "メガシンカY", types: ["エスパー"], hp: 106, atk: 150, def: 70, spa: 194, spd: 120, spe: 140, total: 780, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10044.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10044.ogg" },
+    { id: 10059, baseId: 448, name: "メガルカリオ", rawName: "lucario-mega", _baseSpeciesName: "ルカリオ", formType: "mega", formLabel: "メガシンカ", types: ["かくとう", "はがね"], hp: 70, atk: 145, def: 88, spa: 140, spd: 70, spe: 112, total: 625, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10059.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10059.ogg" },
+    { id: 10038, baseId: 94, name: "メガゲンガー", rawName: "gengar-mega", _baseSpeciesName: "ゲンガー", formType: "mega", formLabel: "メガシンカ", types: ["ゴースト", "どく"], hp: 60, atk: 65, def: 80, spa: 170, spd: 95, spe: 130, total: 600, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10038.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10038.ogg" },
+    // 全リージョンフォーム (アローラ・ガラル・ヒスイ・パルデア)
+    { id: 10091, baseId: 19, name: "コラッタ (アローラのすがた)", rawName: "rattata-alola", _baseSpeciesName: "コラッタ", formType: "regional", formLabel: "アローラ", types: ["あく", "ノーマル"], hp: 30, atk: 56, def: 35, spa: 25, spd: 35, spe: 72, total: 253, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10091.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10091.ogg" },
+    { id: 10092, baseId: 20, name: "ラッタ (アローラのすがた)", rawName: "raticate-alola", _baseSpeciesName: "ラッタ", formType: "regional", formLabel: "アローラ", types: ["あく", "ノーマル"], hp: 75, atk: 71, def: 70, spa: 40, spd: 80, spe: 77, total: 413, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10092.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10092.ogg" },
+    { id: 10100, baseId: 26, name: "ライチュウ (アローラのすがた)", rawName: "raichu-alola", _baseSpeciesName: "ライチュウ", formType: "regional", formLabel: "アローラ", types: ["でんき", "エスパー"], hp: 60, atk: 85, def: 50, spa: 95, spd: 85, spe: 110, total: 485, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10100.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10100.ogg" },
+    { id: 10101, baseId: 27, name: "サンド (アローラのすがた)", rawName: "sandshrew-alola", _baseSpeciesName: "サンド", formType: "regional", formLabel: "アローラ", types: ["こおり", "はがね"], hp: 50, atk: 75, def: 90, spa: 10, spd: 35, spe: 40, total: 300, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10101.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10101.ogg" },
+    { id: 10102, baseId: 28, name: "サンドパン (アローラのすがた)", rawName: "sandslash-alola", _baseSpeciesName: "サンドパン", formType: "regional", formLabel: "アローラ", types: ["こおり", "はがね"], hp: 75, atk: 100, def: 120, spa: 25, spd: 65, spe: 65, total: 450, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10102.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10102.ogg" },
+    { id: 10103, baseId: 37, name: "ロコン (アローラのすがた)", rawName: "vulpix-alola", _baseSpeciesName: "ロコン", formType: "regional", formLabel: "アローラ", types: ["こおり"], hp: 38, atk: 41, def: 40, spa: 50, spd: 65, spe: 65, total: 299, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10103.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10103.ogg" },
+    { id: 10104, baseId: 38, name: "キュウコン (アローラのすがた)", rawName: "ninetales-alola", _baseSpeciesName: "キュウコン", formType: "regional", formLabel: "アローラ", types: ["こおり", "フェアリー"], hp: 73, atk: 67, def: 75, spa: 81, spd: 100, spe: 109, total: 505, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10104.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10104.ogg" },
+    { id: 10105, baseId: 50, name: "ディグダ (アローラのすがた)", rawName: "diglett-alola", _baseSpeciesName: "ディグダ", formType: "regional", formLabel: "アローラ", types: ["じめん", "はがね"], hp: 10, atk: 55, def: 30, spa: 35, spd: 45, spe: 90, total: 265, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10105.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10105.ogg" },
+    { id: 10106, baseId: 51, name: "ダグトリオ (アローラのすがた)", rawName: "dugtrio-alola", _baseSpeciesName: "ダグトリオ", formType: "regional", formLabel: "アローラ", types: ["じめん", "はがね"], hp: 35, atk: 100, def: 60, spa: 50, spd: 70, spe: 110, total: 425, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10106.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10106.ogg" },
+    { id: 10107, baseId: 52, name: "ニャース (アローラのすがた)", rawName: "meowth-alola", _baseSpeciesName: "ニャース", formType: "regional", formLabel: "アローラ", types: ["あく"], hp: 40, atk: 35, def: 35, spa: 50, spd: 40, spe: 90, total: 290, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10107.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10107.ogg" },
+    { id: 10108, baseId: 53, name: "ペルシアン (アローラのすがた)", rawName: "persian-alola", _baseSpeciesName: "ペルシアン", formType: "regional", formLabel: "アローラ", types: ["あく"], hp: 65, atk: 60, def: 60, spa: 75, spd: 65, spe: 115, total: 440, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10108.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10108.ogg" },
+    { id: 10109, baseId: 74, name: "イシツブテ (アローラのすがた)", rawName: "geodude-alola", _baseSpeciesName: "イシツブテ", formType: "regional", formLabel: "アローラ", types: ["いわ", "でんき"], hp: 40, atk: 80, def: 100, spa: 30, spd: 30, spe: 20, total: 300, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10109.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10109.ogg" },
+    { id: 10110, baseId: 75, name: "ゴローン (アローラのすがた)", rawName: "graveler-alola", _baseSpeciesName: "ゴローン", formType: "regional", formLabel: "アローラ", types: ["いわ", "でんき"], hp: 55, atk: 95, def: 115, spa: 45, spd: 45, spe: 35, total: 390, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10110.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10110.ogg" },
+    { id: 10111, baseId: 76, name: "ゴローニャ (アローラのすがた)", rawName: "golem-alola", _baseSpeciesName: "ゴローニャ", formType: "regional", formLabel: "アローラ", types: ["いわ", "でんき"], hp: 80, atk: 120, def: 130, spa: 55, spd: 65, spe: 45, total: 495, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10111.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10111.ogg" },
+    { id: 10112, baseId: 88, name: "ベトベター (アローラのすがた)", rawName: "grimer-alola", _baseSpeciesName: "ベトベター", formType: "regional", formLabel: "アローラ", types: ["どく", "あく"], hp: 80, atk: 80, def: 50, spa: 40, spd: 50, spe: 25, total: 325, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10112.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10112.ogg" },
+    { id: 10113, baseId: 89, name: "ベトベトン (アローラのすがた)", rawName: "muk-alola", _baseSpeciesName: "ベトベトン", formType: "regional", formLabel: "アローラ", types: ["どく", "あく"], hp: 105, atk: 105, def: 75, spa: 65, spd: 100, spe: 50, total: 500, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10113.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10113.ogg" },
+    { id: 10114, baseId: 103, name: "ナッシー (アローラのすがた)", rawName: "exeggutor-alola", _baseSpeciesName: "ナッシー", formType: "regional", formLabel: "アローラ", types: ["くさ", "ドラゴン"], hp: 95, atk: 105, def: 85, spa: 125, spd: 75, spe: 45, total: 530, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10114.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10114.ogg" },
+    { id: 10115, baseId: 105, name: "ガラガラ (アローラのすがた)", rawName: "marowak-alola", _baseSpeciesName: "ガラガラ", formType: "regional", formLabel: "アローラ", types: ["ほのお", "ゴースト"], hp: 60, atk: 80, def: 110, spa: 50, spd: 80, spe: 45, total: 425, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10115.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10115.ogg" },
+    { id: 10161, baseId: 52, name: "ニャース (ガラルのすがた)", rawName: "meowth-galar", _baseSpeciesName: "ニャース", formType: "regional", formLabel: "ガラル", types: ["はがね"], hp: 50, atk: 65, def: 55, spa: 40, spd: 40, spe: 40, total: 290, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10161.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10161.ogg" },
+    { id: 10162, baseId: 77, name: "ポニータ (ガラルのすがた)", rawName: "ponyta-galar", _baseSpeciesName: "ポニータ", formType: "regional", formLabel: "ガラル", types: ["エスパー"], hp: 50, atk: 85, def: 55, spa: 65, spd: 65, spe: 90, total: 410, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10162.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10162.ogg" },
+    { id: 10163, baseId: 78, name: "ギャロップ (ガラルのすがた)", rawName: "rapidash-galar", _baseSpeciesName: "ギャロップ", formType: "regional", formLabel: "ガラル", types: ["エスパー", "フェアリー"], hp: 65, atk: 100, def: 70, spa: 80, spd: 80, spe: 105, total: 500, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10163.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10163.ogg" },
+    { id: 10164, baseId: 79, name: "ヤドン (ガラルのすがた)", rawName: "slowpoke-galar", _baseSpeciesName: "ヤドン", formType: "regional", formLabel: "ガラル", types: ["エスパー"], hp: 90, atk: 65, def: 65, spa: 40, spd: 40, spe: 15, total: 315, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10164.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10164.ogg" },
+    { id: 10165, baseId: 80, name: "ヤドラン (ガラルのすがた)", rawName: "slowbro-galar", _baseSpeciesName: "ヤドラン", formType: "regional", formLabel: "ガラル", types: ["どく", "エスパー"], hp: 95, atk: 100, def: 95, spa: 100, spd: 70, spe: 30, total: 490, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10165.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10165.ogg" },
+    { id: 10166, baseId: 83, name: "カモネギ (ガラルのすがた)", rawName: "farfetchd-galar", _baseSpeciesName: "カモネギ", formType: "regional", formLabel: "ガラル", types: ["かくとう"], hp: 52, atk: 95, def: 55, spa: 58, spd: 62, spe: 55, total: 377, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10166.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10166.ogg" },
+    { id: 10167, baseId: 110, name: "マタドガス (ガラルのすがた)", rawName: "weezing-galar", _baseSpeciesName: "マタドガス", formType: "regional", formLabel: "ガラル", types: ["どく", "フェアリー"], hp: 65, atk: 90, def: 120, spa: 85, spd: 70, spe: 60, total: 490, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10167.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10167.ogg" },
+    { id: 10168, baseId: 122, name: "バリヤード (ガラルのすがた)", rawName: "mr-mime-galar", _baseSpeciesName: "バリヤード", formType: "regional", formLabel: "ガラル", types: ["こおり", "エスパー"], hp: 50, atk: 65, def: 65, spa: 90, spd: 90, spe: 100, total: 460, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10168.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10168.ogg" },
+    { id: 10169, baseId: 144, name: "フリーザー (ガラルのすがた)", rawName: "articuno-galar", _baseSpeciesName: "フリーザー", formType: "regional", formLabel: "ガラル", types: ["エスパー", "ひこう"], hp: 90, atk: 85, def: 85, spa: 125, spd: 100, spe: 95, total: 580, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10169.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10169.ogg" },
+    { id: 10170, baseId: 145, name: "サンダー (ガラルのすがた)", rawName: "zapdos-galar", _baseSpeciesName: "サンダー", formType: "regional", formLabel: "ガラル", types: ["かくとう", "ひこう"], hp: 90, atk: 125, def: 90, spa: 85, spd: 90, spe: 100, total: 580, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10170.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10170.ogg" },
+    { id: 10171, baseId: 146, name: "ファイヤー (ガラルのすがた)", rawName: "moltres-galar", _baseSpeciesName: "ファイヤー", formType: "regional", formLabel: "ガラル", types: ["あく", "ひこう"], hp: 90, atk: 85, def: 90, spa: 100, spd: 125, spe: 90, total: 580, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10171.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10171.ogg" },
+    { id: 10172, baseId: 199, name: "ヤドキング (ガラルのすがた)", rawName: "slowking-galar", _baseSpeciesName: "ヤドキング", formType: "regional", formLabel: "ガラル", types: ["どく", "エスパー"], hp: 95, atk: 65, def: 80, spa: 110, spd: 110, spe: 30, total: 490, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10172.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10172.ogg" },
+    { id: 10173, baseId: 222, name: "サニーゴ (ガラルのすがた)", rawName: "corsola-galar", _baseSpeciesName: "サニーゴ", formType: "regional", formLabel: "ガラル", types: ["ゴースト"], hp: 60, atk: 55, def: 100, spa: 65, spd: 100, spe: 30, total: 410, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10173.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10173.ogg" },
+    { id: 10174, baseId: 263, name: "ジグザグマ (ガラルのすがた)", rawName: "zigzagoon-galar", _baseSpeciesName: "ジグザグマ", formType: "regional", formLabel: "ガラル", types: ["あく", "ノーマル"], hp: 38, atk: 30, def: 41, spa: 30, spd: 41, spe: 60, total: 240, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10174.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10174.ogg" },
+    { id: 10175, baseId: 264, name: "マッスグマ (ガラルのすがた)", rawName: "linoone-galar", _baseSpeciesName: "マッスグマ", formType: "regional", formLabel: "ガラル", types: ["あく", "ノーマル"], hp: 78, atk: 70, def: 61, spa: 50, spd: 61, spe: 100, total: 420, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10175.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10175.ogg" },
+    { id: 10176, baseId: 554, name: "ダルマッカ (ガラルのすがた)", rawName: "darumaka-galar", _baseSpeciesName: "ダルマッカ", formType: "regional", formLabel: "ガラル", types: ["こおり"], hp: 70, atk: 90, def: 45, spa: 15, spd: 45, spe: 50, total: 315, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10176.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10176.ogg" },
+    { id: 10177, baseId: 555, name: "ヒヒダルマ (ガラルのすがた)", rawName: "darmanitan-galar-standard", _baseSpeciesName: "ヒヒダルマ", formType: "regional", formLabel: "ガラル", types: ["こおり"], hp: 105, atk: 140, def: 55, spa: 30, spd: 55, spe: 95, total: 480, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10177.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10177.ogg" },
+    { id: 10178, baseId: 555, name: "ヒヒダルマ (ガラルのすがた・ダルマモード)", rawName: "darmanitan-galar-zen", _baseSpeciesName: "ヒヒダルマ", formType: "regional", formLabel: "ガラル (ダルマモード)", types: ["こおり", "ほのお"], hp: 105, atk: 160, def: 55, spa: 30, spd: 55, spe: 135, total: 540, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10178.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10178.ogg" },
+    { id: 10179, baseId: 562, name: "デスマス (ガラルのすがた)", rawName: "yamask-galar", _baseSpeciesName: "デスマス", formType: "regional", formLabel: "ガラル", types: ["じめん", "ゴースト"], hp: 38, atk: 55, def: 85, spa: 30, spd: 65, spe: 30, total: 303, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10179.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10179.ogg" },
+    { id: 10180, baseId: 618, name: "マッギョ (ガラルのすがた)", rawName: "stunfisk-galar", _baseSpeciesName: "マッギョ", formType: "regional", formLabel: "ガラル", types: ["じめん", "はがね"], hp: 109, atk: 81, def: 99, spa: 66, spd: 84, spe: 32, total: 471, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10180.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10180.ogg" },
+    { id: 10229, baseId: 58, name: "ガーディ (ヒスイのすがた)", rawName: "growlithe-hisui", _baseSpeciesName: "ガーディ", formType: "regional", formLabel: "ヒスイ", types: ["ほのお", "いわ"], hp: 60, atk: 75, def: 45, spa: 65, spd: 50, spe: 55, total: 350, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10229.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10229.ogg" },
+    { id: 10230, baseId: 59, name: "ウインディ (ヒスイのすがた)", rawName: "arcanine-hisui", _baseSpeciesName: "ウインディ", formType: "regional", formLabel: "ヒスイ", types: ["ほのお", "いわ"], hp: 95, atk: 115, def: 80, spa: 95, spd: 80, spe: 90, total: 555, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10230.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10230.ogg" },
+    { id: 10231, baseId: 100, name: "ビリリダマ (ヒスイのすがた)", rawName: "voltorb-hisui", _baseSpeciesName: "ビリリダマ", formType: "regional", formLabel: "ヒスイ", types: ["でんき", "くさ"], hp: 40, atk: 30, def: 50, spa: 55, spd: 55, spe: 100, total: 330, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10231.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10231.ogg" },
+    { id: 10232, baseId: 101, name: "マルマイン (ヒスイのすがた)", rawName: "electrode-hisui", _baseSpeciesName: "マルマイン", formType: "regional", formLabel: "ヒスイ", types: ["でんき", "くさ"], hp: 60, atk: 50, def: 70, spa: 80, spd: 80, spe: 150, total: 490, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10232.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10232.ogg" },
+    { id: 10233, baseId: 157, name: "バクフーン (ヒスイのすがた)", rawName: "typhlosion-hisui", _baseSpeciesName: "バクフーン", formType: "regional", formLabel: "ヒスイ", types: ["ほのお", "ゴースト"], hp: 73, atk: 84, def: 78, spa: 119, spd: 85, spe: 95, total: 534, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10233.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10233.ogg" },
+    { id: 10234, baseId: 211, name: "ハリーセン (ヒスイのすがた)", rawName: "qwilfish-hisui", _baseSpeciesName: "ハリーセン", formType: "regional", formLabel: "ヒスイ", types: ["あく", "どく"], hp: 65, atk: 95, def: 85, spa: 55, spd: 55, spe: 85, total: 440, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10234.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10234.ogg" },
+    { id: 10235, baseId: 215, name: "ニューラ (ヒスイのすがた)", rawName: "sneasel-hisui", _baseSpeciesName: "ニューラ", formType: "regional", formLabel: "ヒスイ", types: ["かくとう", "どく"], hp: 55, atk: 95, def: 55, spa: 35, spd: 75, spe: 115, total: 430, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10235.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10235.ogg" },
+    { id: 10236, baseId: 503, name: "ダイケンキ (ヒスイのすがた)", rawName: "samurott-hisui", _baseSpeciesName: "ダイケンキ", formType: "regional", formLabel: "ヒスイ", types: ["みず", "あく"], hp: 90, atk: 108, def: 80, spa: 100, spd: 65, spe: 85, total: 528, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10236.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10236.ogg" },
+    { id: 10237, baseId: 549, name: "ドレディア (ヒスイのすがた)", rawName: "lilligant-hisui", _baseSpeciesName: "ドレディア", formType: "regional", formLabel: "ヒスイ", types: ["くさ", "かくとう"], hp: 70, atk: 105, def: 75, spa: 50, spd: 75, spe: 105, total: 480, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10237.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10237.ogg" },
+    { id: 10238, baseId: 570, name: "ゾロア (ヒスイのすがた)", rawName: "zorua-hisui", _baseSpeciesName: "ゾロア", formType: "regional", formLabel: "ヒスイ", types: ["ノーマル", "ゴースト"], hp: 35, atk: 60, def: 40, spa: 85, spd: 40, spe: 70, total: 330, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10238.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10238.ogg" },
+    { id: 10239, baseId: 571, name: "ゾロアーク (ヒスイのすがた)", rawName: "zoroark-hisui", _baseSpeciesName: "ゾロアーク", formType: "regional", formLabel: "ヒスイ", types: ["ノーマル", "ゴースト"], hp: 55, atk: 100, def: 60, spa: 125, spd: 60, spe: 110, total: 510, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10239.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10239.ogg" },
+    { id: 10240, baseId: 628, name: "ウォーグル (ヒスイのすがた)", rawName: "braviary-hisui", _baseSpeciesName: "ウォーグル", formType: "regional", formLabel: "ヒスイ", types: ["エスパー", "ひこう"], hp: 110, atk: 83, def: 70, spa: 112, spd: 70, spe: 65, total: 510, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10240.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10240.ogg" },
+    { id: 10241, baseId: 705, name: "ヌメイル (ヒスイのすがた)", rawName: "sliggoo-hisui", _baseSpeciesName: "ヌメイル", formType: "regional", formLabel: "ヒスイ", types: ["はがね", "ドラゴン"], hp: 58, atk: 75, def: 83, spa: 83, spd: 113, spe: 40, total: 452, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10241.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10241.ogg" },
+    { id: 10242, baseId: 706, name: "ヌメルゴン (ヒスイのすがた)", rawName: "goodra-hisui", _baseSpeciesName: "ヌメルゴン", formType: "regional", formLabel: "ヒスイ", types: ["はがね", "ドラゴン"], hp: 80, atk: 100, def: 100, spa: 110, spd: 150, spe: 60, total: 600, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10242.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10242.ogg" },
+    { id: 10243, baseId: 713, name: "クレベース (ヒスイのすがた)", rawName: "avalugg-hisui", _baseSpeciesName: "クレベース", formType: "regional", formLabel: "ヒスイ", types: ["こおり", "いわ"], hp: 95, atk: 127, def: 184, spa: 34, spd: 36, spe: 38, total: 514, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10243.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10243.ogg" },
+    { id: 10244, baseId: 724, name: "ジュナイパー (ヒスイのすがた)", rawName: "decidueye-hisui", _baseSpeciesName: "ジュナイパー", formType: "regional", formLabel: "ヒスイ", types: ["くさ", "かくとう"], hp: 88, atk: 112, def: 80, spa: 95, spd: 95, spe: 60, total: 530, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10244.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10244.ogg" },
+    { id: 10250, baseId: 128, name: "ケンタロス (パルデアのすがた・コンバット種)", rawName: "tauros-paldea-combat-breed", _baseSpeciesName: "ケンタロス", formType: "regional", formLabel: "パルデア (かくとう)", types: ["かくとう"], hp: 75, atk: 110, def: 105, spa: 30, spd: 70, spe: 100, total: 490, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10250.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10250.ogg" },
+    { id: 10251, baseId: 128, name: "ケンタロス (パルデアのすがた・ブレイズ種)", rawName: "tauros-paldea-blaze-breed", _baseSpeciesName: "ケンタロス", formType: "regional", formLabel: "パルデア (ほのお)", types: ["かくとう", "ほのお"], hp: 75, atk: 110, def: 105, spa: 30, spd: 70, spe: 100, total: 490, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10251.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10251.ogg" },
+    { id: 10252, baseId: 128, name: "ケンタロス (パルデアのすがた・ウォーター種)", rawName: "tauros-paldea-aqua-breed", _baseSpeciesName: "ケンタロス", formType: "regional", formLabel: "パルデア (みず)", types: ["かくとう", "みず"], hp: 75, atk: 110, def: 105, spa: 30, spd: 70, spe: 100, total: 490, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10252.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10252.ogg" },
+    { id: 10253, baseId: 194, name: "ウパー (パルデアのすがた)", rawName: "wooper-paldea", _baseSpeciesName: "ウパー", formType: "regional", formLabel: "パルデア", types: ["どく", "じめん"], hp: 55, atk: 45, def: 45, spa: 25, spd: 25, spe: 15, total: 210, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10253.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10253.ogg" },
+
 ];
 
 let pokemonList = [];
 let selectedTypes = new Set();
 let currentFormFilter = 'all';
-const TOTAL_POKEMON_TARGET = 1351;
+const TOTAL_POKEMON_TARGET = 1257;
 let isPlayingAudio = false;
 
 // 描画パフォーマンス向上のための変数
@@ -109,12 +167,7 @@ function shouldExcludePokemon(rawName, id, baseId) {
         return true;
     }
 
-    // 7. パルデアケンタロス (ID 128) の姿の統一
-    // tauros-paldea-combat-breed (ID 10250) のみを「ケンタロス (パルデアのすがた)」として残し、
-    // blaze-breed (ID 10251) と aqua-breed (ID 10252) は重複・区別しづらいため除外
-    if (n.includes('tauros-paldea-blaze') || n.includes('tauros-paldea-aqua')) {
-        return true;
-    }
+    // 7. パルデアケンタロス (ID 128) はコンバット種 (かくとう)、ブレイズ種 (ほのお)、ウォーター種 (みず) の全3種をすべて収録
 
     // 8. ノココッチの姿違い統一 (ふたふしフォルム ID 982 を残し、みつふしフォルム ID 10255 を除外)
     if (n.includes('dudunsparce-three-segment') || id === 10255) {
@@ -219,10 +272,22 @@ function determineFormInfo(rawName, id, speciesName) {
         return { formType: 'regional', formLabel: 'アローラ', displayName: `${baseName} (アローラのすがた)` };
     }
     if (n.includes('-galar')) {
+        if (n.includes('darmanitan-galar-zen')) {
+            return { formType: 'regional', formLabel: 'ガラル (ダルマモード)', displayName: `${baseName} (ガラルのすがた・ダルマモード)` };
+        }
         return { formType: 'regional', formLabel: 'ガラル', displayName: `${baseName} (ガラルのすがた)` };
     }
     if (n.includes('-hisui')) {
         return { formType: 'regional', formLabel: 'ヒスイ', displayName: `${baseName} (ヒスイのすがた)` };
+    }
+    if (n.includes('tauros-paldea-combat') || (n.includes('tauros-paldea') && n.includes('combat'))) {
+        return { formType: 'regional', formLabel: 'パルデア (かくとう)', displayName: `${baseName} (パルデアのすがた・コンバット種)` };
+    }
+    if (n.includes('tauros-paldea-blaze') || (n.includes('tauros-paldea') && n.includes('blaze'))) {
+        return { formType: 'regional', formLabel: 'パルデア (ほのお)', displayName: `${baseName} (パルデアのすがた・ブレイズ種)` };
+    }
+    if (n.includes('tauros-paldea-aqua') || (n.includes('tauros-paldea') && n.includes('aqua'))) {
+        return { formType: 'regional', formLabel: 'パルデア (みず)', displayName: `${baseName} (パルデアのすがた・ウォーター種)` };
     }
     if (n.includes('-paldea')) {
         return { formType: 'regional', formLabel: 'パルデア', displayName: `${baseName} (パルデアのすがた)` };
@@ -258,6 +323,41 @@ function determineFormInfo(rawName, id, speciesName) {
     if (n.includes('-fan')) return { formType: 'other', formLabel: 'スピン', displayName: `${baseName} (スピン)` };
     if (n.includes('-mow')) return { formType: 'other', formLabel: 'カット', displayName: `${baseName} (カット)` };
 
+    // バドレックス合体フォルム（レイスポス・ブリザポス合体）
+    if (n.includes('calyrex-ice')) {
+        return { formType: 'other', formLabel: 'はくばじょう', displayName: `${baseName} (はくばじょうのすがた)` };
+    }
+    if (n.includes('calyrex-shadow')) {
+        return { formType: 'other', formLabel: 'こくばじょう', displayName: `${baseName} (こくばじょうのすがた)` };
+    }
+
+    // キュレム合体フォルム (レシラム・ゼクロム合体)
+    if (n.includes('kyurem-white')) {
+        return { formType: 'other', formLabel: 'ホワイトキュレム', displayName: `ホワイトキュレム` };
+    }
+    if (n.includes('kyurem-black')) {
+        return { formType: 'other', formLabel: 'ブラックキュレム', displayName: `ブラックキュレム` };
+    }
+
+    // ネクロズマ合体フォルム (ソルガレオ・ルナアーラ合体)
+    if (n.includes('necrozma-dusk')) {
+        return { formType: 'other', formLabel: 'たそがれ', displayName: `${baseName} (たそがれのたてがみ)` };
+    }
+    if (n.includes('necrozma-dawn')) {
+        return { formType: 'other', formLabel: 'あかつき', displayName: `${baseName} (あかつきのつばさ)` };
+    }
+    if (n.includes('necrozma-ultra')) {
+        return { formType: 'other', formLabel: 'ウルトラ', displayName: `ウルトラ${baseName}` };
+    }
+
+    // ウーラオス
+    if (n.includes('urshifu-rapid-strike')) {
+        return { formType: 'other', formLabel: 'れんげき', displayName: `${baseName} (れんげきのかた)` };
+    }
+    if (n.includes('urshifu-single-strike')) {
+        return { formType: 'other', formLabel: 'いちげき', displayName: `${baseName} (いちげきのかた)` };
+    }
+
     const suffix = rawName.split('-').slice(1).join(' ');
     return {
         formType: 'other',
@@ -290,9 +390,6 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(searchDebounceTimeout);
         searchDebounceTimeout = setTimeout(() => {
             filterAndRenderPokemon();
-            if (val && val.trim().length >= 2) {
-                recordAnalyticsLog('SEARCH', { keyword: val.trim() });
-            }
         }, 350);
     }
 
@@ -376,21 +473,34 @@ function updateFormCounts() {
 }
 
 async function fetchOptimizedPokemonData() {
-    const CACHE_KEY = 'poketone_clean_v5';
-    // 既存キャッシュからキョダイマックス・重複姿・ノココッチ等姿違い重複を除外し、Zメガや最新命名規則を自動反映
-    const cached = localStorage.getItem(CACHE_KEY) || localStorage.getItem('poketone_clean_v4') || localStorage.getItem('poketone_clean_v3') || localStorage.getItem('poketone_clean_v2') || localStorage.getItem('poketone_clean_v1') || localStorage.getItem('pokestats_master_v1351_all_forms');
+    const CACHE_KEY = 'poketone_clean_v7';
+    // 既存キャッシュからキョダイマックス・重複姿を除外し、ガラルヤドラン修正・ヒスイウォーグル・パルデアケンタロス全3種を反映
+    const cached = localStorage.getItem(CACHE_KEY) || localStorage.getItem('poketone_clean_v6') || localStorage.getItem('poketone_clean_v5') || localStorage.getItem('poketone_clean_v4') || localStorage.getItem('poketone_clean_v3') || localStorage.getItem('poketone_clean_v2') || localStorage.getItem('poketone_clean_v1') || localStorage.getItem('pokestats_master_v1351_all_forms');
     if (cached) {
         try {
             const rawList = JSON.parse(cached);
-            pokemonList = rawList
+            let cleanedList = rawList
                 .filter(p => !shouldExcludePokemon(p.rawName || p.name, p.id, p.baseId))
                 .map(p => {
+                    // ID 10165 はヤドラン (ガラルのすがた) であるべき（旧キャッシュで誤ってジグザグマになっていた場合の自動補正）
+                    if (p.id === 10165 && (p.rawName?.includes('zigzagoon') || p.name?.includes('ジグザグマ'))) {
+                        p.baseId = 80;
+                        p.rawName = 'slowbro-galar';
+                        p._baseSpeciesName = 'ヤドラン';
+                        p.name = 'ヤドラン (ガラルのすがた)';
+                        p.formType = 'regional';
+                        p.formLabel = 'ガラル';
+                        p.types = ['どく', 'エスパー'];
+                        p.hp = 95; p.atk = 100; p.def = 95; p.spa = 100; p.spd = 70; p.spe = 30; p.total = 490;
+                        p.image = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10165.png';
+                        p.cry = 'https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10165.ogg';
+                    }
                     if (p.cry && p.cry.includes('/sprites/pokemon/latest/')) {
                         p.cry = p.cry.replace('/sprites/pokemon/latest/', '/cries/pokemon/latest/');
                     }
                     const cleanBase = cleanBaseSpeciesName(p._baseSpeciesName || p.name);
                     p._baseSpeciesName = cleanBase;
-                    // rawNameが存在する場合、メガZなどの最新フォルム判定を再適用
+                    // rawNameが存在する場合、最新フォルム判定を再適用
                     if (p.rawName) {
                         const parsed = determineFormInfo(p.rawName, p.id, cleanBase);
                         p.formType = parsed.formType;
@@ -401,12 +511,33 @@ async function fetchOptimizedPokemonData() {
                     }
                     return p;
                 });
+
+            // 必須のフォールバックポケモン（全リージョンフォーム等）でキャッシュに欠けているものを補充
+            EMBEDDED_FALLBACK_POKEMON.forEach(fb => {
+                if (!cleanedList.some(p => p.id === fb.id)) {
+                    cleanedList.push(fb);
+                }
+            });
+
+            // ソート: 全国図鑑番号（baseId）順かつ同一番号内はID順
+            cleanedList.sort((a, b) => {
+                const bA = a.baseId || a.id;
+                const bB = b.baseId || b.id;
+                if (bA === bB) return a.id - b.id;
+                return bA - bB;
+            });
+
+            pokemonList = cleanedList;
             localStorage.setItem(CACHE_KEY, JSON.stringify(pokemonList));
             updateLoadedCount();
             updateFormCounts();
-            document.getElementById('loading-banner').classList.add('hidden');
             filterAndRenderPokemon();
-            return;
+
+            // すでに全件取得済み（1000匹以上）なら取得バナーを閉じて終了
+            if (pokemonList.length >= 1000) {
+                document.getElementById('loading-banner').classList.add('hidden');
+                return;
+            }
         } catch (e) {
             console.warn("Cache parse error, re-fetching...");
         }
@@ -477,7 +608,9 @@ async function fetchOptimizedPokemonData() {
                         try {
                             const sRes = await fetch(speciesUrl || `https://pokeapi.co/api/v2/pokemon-species/${baseId}/`);
                             const sData = await sRes.json();
-                            const jpObj = sData.names?.find(n => n.language.name === 'ja' || n.language.name === 'roomaji');
+                            const jpObj = sData.names?.find(n => n.language.name === 'ja') ||
+                                          sData.names?.find(n => n.language.name === 'ja-Hrkt' || n.language.name === 'ja-hrkt') ||
+                                          sData.names?.find(n => n.language.name === 'roomaji' || n.language.name === 'ja-roma');
                             speciesName = jpObj ? jpObj.name : pData.name;
                             speciesNameCache[baseId] = speciesName;
                         } catch (e) {
@@ -567,10 +700,18 @@ function updateLoadedCount() {
     if (el) el.textContent = pokemonList.length;
     const targetEl = document.getElementById('total-target-count');
     if (targetEl) {
-        // キャッシュ済みあるいは全読み込み時は実データ数と一致させる
-        if (pokemonList.length > 50) {
-            targetEl.textContent = pokemonList.length;
-        }
+        // 最大ポケモン数（全1257匹）を表示。全データ取得完了後は実データ数と連動
+        const maxCount = Math.max(TOTAL_POKEMON_TARGET, pokemonList.length);
+        targetEl.textContent = maxCount;
+    }
+    const loadingText = document.getElementById('loading-text');
+    const loadingBanner = document.getElementById('loading-banner');
+    if (loadingText && loadingBanner && !loadingBanner.classList.contains('hidden')) {
+        const maxCount = Math.max(TOTAL_POKEMON_TARGET, pokemonList.length);
+        const percent = Math.min(100, Math.round((pokemonList.length / maxCount) * 100));
+        loadingText.textContent = `全ポケモンデータを取得中... (${pokemonList.length} / ${maxCount} 匹 - ${percent}%)`;
+        const progressBar = document.getElementById('loading-progress');
+        if (progressBar) progressBar.style.width = percent + '%';
     }
 }
 
@@ -683,12 +824,15 @@ function filterAndRenderPokemon() {
         if (!p._sc) {
             const nl = (p.name || '').toLowerCase();
             const fl = (p.formLabel || '').toLowerCase();
+            const aliases = getPokemonAliases(p);
             p._sc = {
                 name: nl,
                 nameHira: toHiragana(nl),
                 form: fl,
                 formHira: toHiragana(fl),
                 rawName: (p.rawName || '').toLowerCase(),
+                aliasesNorm: aliases.map(a => normalizePokemonQuery(a)),
+                aliasesHira: aliases.map(a => toHiragana(normalizePokemonQuery(a))),
                 idStr: p.id.toString(),
                 baseIdStr: p.baseId ? p.baseId.toString() : '',
                 baseIdPad3: p.baseId ? p.baseId.toString().padStart(3, '0') : '',
@@ -697,6 +841,12 @@ function filterAndRenderPokemon() {
         }
 
         const sc = p._sc;
+        const normQ = normalizePokemonQuery(query);
+        const normKataQ = toKatakana(normQ);
+        const normHiraQ = toHiragana(normQ);
+        const matchAlias = sc.aliasesNorm.some(a => a.includes(normQ) || a.includes(normKataQ)) ||
+                           sc.aliasesHira.some(a => a.includes(normHiraQ));
+
         return sc.name.includes(query) ||
                sc.name.includes(queryKata) ||
                sc.nameHira.includes(query) ||
@@ -706,6 +856,7 @@ function filterAndRenderPokemon() {
                sc.formHira.includes(query) ||
                sc.formHira.includes(queryHira) ||
                sc.rawName.includes(query) ||
+               matchAlias ||
                sc.idStr === query ||
                sc.baseIdStr === query ||
                sc.baseIdPad3 === query ||
@@ -752,7 +903,12 @@ function getFormBadgeHtml(p) {
         let col = "from-sky-500 to-blue-600";
         if (p.formLabel.includes('ガラル')) col = "from-fuchsia-500 to-rose-600";
         if (p.formLabel.includes('ヒスイ')) col = "from-emerald-600 to-teal-700";
-        if (p.formLabel.includes('パルデア')) col = "from-amber-500 to-orange-600";
+        if (p.formLabel.includes('パルデア')) {
+            if (p.formLabel.includes('ほのお')) col = "from-amber-500 to-red-600";
+            else if (p.formLabel.includes('みず')) col = "from-sky-500 to-blue-700";
+            else if (p.formLabel.includes('かくとう')) col = "from-orange-600 to-amber-700";
+            else col = "from-amber-500 to-orange-600";
+        }
         return `<span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-gradient-to-r ${col} text-white shadow-xs"><i class="fa-solid fa-earth-asia mr-0.5"></i>${p.formLabel}</span>`;
     }
     if (p.formType === 'other') {
@@ -857,7 +1013,6 @@ function openDetailModalFromId(id) {
 }
 
 function openDetailModal(p) {
-    recordAnalyticsLog('SELECT', { pokemonName: p.name, pokemonId: p.id, baseId: p.baseId });
     const modal = document.getElementById('detail-modal');
     const content = document.getElementById('modal-content');
 
@@ -1253,6 +1408,7 @@ function backToQuizModeSelect() {
     document.getElementById('quiz-playing-screen').classList.add('hidden');
     document.getElementById('quiz-result-screen').classList.add('hidden');
     document.getElementById('quiz-badge-mode').textContent = '';
+    closeQuizFormSelectionPanel();
     stopQuizWave();
 }
 
@@ -1286,6 +1442,8 @@ function startQuiz(mode) {
     renderQuizHearts();
     const input = document.getElementById('quiz-guess-input');
     input.value = '';
+    closeQuizFormSelectionPanel();
+    input.oninput = handleQuizInputSuggestion;
     const errBox = document.getElementById('quiz-input-error');
     if (errBox) errBox.classList.add('hidden');
 
@@ -1331,48 +1489,397 @@ function playQuizTargetMelody() {
     playStatMelody(quizTargetPokemon);
 }
 
-function handleQuizSubmit(e) {
-    e.preventDefault();
-    const input = document.getElementById('quiz-guess-input');
-    const errBox = document.getElementById('quiz-input-error');
-    const errText = document.getElementById('quiz-input-error-text');
-    const rawVal = (input.value || '').trim();
-    if (!rawVal) return;
+// 特殊合体・関連フォルムグループの定義（レイスポス、ブリザポス、バドレックス、キュレム、ネクロズマ等）
+const SPECIAL_RELATED_FORM_GROUPS = [
+    {
+        name: 'バドレックス・愛馬',
+        keywords: ['レイスポス', 'ブリザポス', 'バドレックス'],
+        rawKeys: ['spectrier', 'glastrier', 'calyrex']
+    },
+    {
+        name: 'キュレム合体',
+        keywords: ['キュレム', 'レシラム', 'ゼクロム'],
+        rawKeys: ['kyurem', 'reshiram', 'zekrom']
+    },
+    {
+        name: 'ネクロズマ合体',
+        keywords: ['ネクロズマ', 'ソルガレオ', 'ルナアーラ'],
+        rawKeys: ['necrozma', 'solgaleo', 'lunala']
+    }
+];
 
-    errBox.classList.add('hidden');
+// ポケモンのすべての別名（地方名+ポケモン名、メガ+ポケモン名等）を網羅するエイリアス一覧
+function getPokemonAliases(p) {
+    const aliases = new Set();
+    const rawName = p.name || '';
+    aliases.add(rawName);
 
-    const queryKata = toKatakana(rawVal).toLowerCase();
-    const queryHira = toHiragana(rawVal).toLowerCase();
+    const baseName = cleanBaseSpeciesName(p._baseSpeciesName || p.name);
+    if (baseName) aliases.add(baseName);
 
-    function normalizeName(name) {
-        return (name || '').toLowerCase().replace(/\s+/g, '').replace(/[（\(\)）]/g, '');
+    const regions = [
+        { label: 'アローラ', hira: 'あろーら', key: 'alola' },
+        { label: 'ガラル', hira: 'がらる', key: 'galar' },
+        { label: 'ヒスイ', hira: 'ひすい', key: 'hisui' },
+        { label: 'パルデア', hira: 'ぱるであ', key: 'paldea' }
+    ];
+
+    const pRaw = (p.rawName || '').toLowerCase();
+    const isRegional = p.formType === 'regional' || regions.some(r => pRaw.includes(r.key) || rawName.includes(r.label));
+
+    if (isRegional && baseName) {
+        regions.forEach(r => {
+            if (pRaw.includes(r.key) || rawName.includes(r.label) || (p.formLabel && p.formLabel.includes(r.label))) {
+                // 地方名 + ポケモン名（例: ヒスイヌメルゴン, ガラルヤドラン, ヒスイウォーグル, アローラロコン）
+                aliases.add(`${r.label}${baseName}`);
+                aliases.add(`${r.label}のすがたの${baseName}`);
+                aliases.add(`${r.label}の${baseName}`);
+                // ポケモン名 + 地方名（例: ヌメルゴンヒスイ）
+                aliases.add(`${baseName}${r.label}`);
+                aliases.add(`${baseName}(${r.label})`);
+                aliases.add(`${baseName} (${r.label})`);
+                aliases.add(`${baseName}(${r.label}のすがた)`);
+                aliases.add(`${baseName} (${r.label}のすがた)`);
+            }
+        });
     }
 
-    const normKata = normalizeName(queryKata);
-    const normHira = normalizeName(queryHira);
+    // パルデアケンタロス専用のエイリアス強化（コンバット種/ブレイズ種/ウォーター種、格闘/炎/水）
+    if (baseName === 'ケンタロス') {
+        const isCombat = pRaw.includes('combat') || (p.formLabel && p.formLabel.includes('かくとう'));
+        const isBlaze = pRaw.includes('blaze') || (p.formLabel && p.formLabel.includes('ほのお'));
+        const isAqua = pRaw.includes('aqua') || (p.formLabel && p.formLabel.includes('みず'));
 
-    const found = pokemonList.find(p => {
-        const pNorm = normalizeName(p.name);
-        const pNormHira = toHiragana(pNorm);
-        const pNormKata = toKatakana(pNorm);
-        return pNorm === normKata || pNorm === normHira || 
-               pNormHira === normHira || pNormKata === normKata ||
-               (p.rawName && p.rawName.toLowerCase() === rawVal.toLowerCase());
+        if (isCombat) {
+            aliases.add('パルデアケンタロス');
+            aliases.add('ケンタロス(パルデアのすがた・コンバット種)');
+            aliases.add('ケンタロス(コンバット種)');
+            aliases.add('コンバット種ケンタロス');
+            aliases.add('コンバットケンタロス');
+            aliases.add('コンバットパルデアケンタロス');
+            aliases.add('パルデアケンタロス(コンバット種)');
+            aliases.add('パルデアケンタロス(コンバット)');
+            aliases.add('パルデアケンタロスコンバット');
+            aliases.add('格闘パルデアケンタロス');
+            aliases.add('かくとうパルデアケンタロス');
+            aliases.add('格闘ケンタロス');
+            aliases.add('かくとうケンタロス');
+            aliases.add('格闘単パルデアケンタロス');
+            aliases.add('単格闘パルデアケンタロス');
+            aliases.add('パルデアケンタロス(格闘)');
+            aliases.add('パルデアケンタロス(かくとう)');
+            aliases.add('パルデアケンタロス格闘');
+        } else if (isBlaze) {
+            aliases.add('パルデアケンタロス');
+            aliases.add('ケンタロス(パルデアのすがた・ブレイズ種)');
+            aliases.add('ケンタロス(ブレイズ種)');
+            aliases.add('ブレイズ種ケンタロス');
+            aliases.add('ブレイズケンタロス');
+            aliases.add('ブレイズパルデアケンタロス');
+            aliases.add('パルデアケンタロス(ブレイズ種)');
+            aliases.add('パルデアケンタロス(ブレイズ)');
+            aliases.add('パルデアケンタロスブレイズ');
+            aliases.add('炎パルデアケンタロス');
+            aliases.add('ほのおパルデアケンタロス');
+            aliases.add('炎ケンタロス');
+            aliases.add('ほのおケンタロス');
+            aliases.add('パルデアケンタロス(炎)');
+            aliases.add('パルデアケンタロス(ほのお)');
+            aliases.add('パルデアケンタロス炎');
+        } else if (isAqua) {
+            aliases.add('パルデアケンタロス');
+            aliases.add('ケンタロス(パルデアのすがた・ウォーター種)');
+            aliases.add('ケンタロス(ウォーター種)');
+            aliases.add('ウォーター種ケンタロス');
+            aliases.add('ウォーターケンタロス');
+            aliases.add('ウォーターパルデアケンタロス');
+            aliases.add('パルデアケンタロス(ウォーター種)');
+            aliases.add('パルデアケンタロス(ウォーター)');
+            aliases.add('パルデアケンタロスウォーター');
+            aliases.add('水パルデアケンタロス');
+            aliases.add('みずパルデアケンタロス');
+            aliases.add('水ケンタロス');
+            aliases.add('みずケンタロス');
+            aliases.add('パルデアケンタロス(水)');
+            aliases.add('パルデアケンタロス(みず)');
+            aliases.add('パルデアケンタロス水');
+        }
+    }
+
+    // メガシンカ
+    if (p.formType === 'mega' || pRaw.includes('mega')) {
+        let suffix = '';
+        if (pRaw.includes('mega-x') || rawName.endsWith('X')) suffix = 'X';
+        if (pRaw.includes('mega-y') || rawName.endsWith('Y')) suffix = 'Y';
+        if (pRaw.includes('mega-z') || rawName.endsWith('Z')) suffix = 'Z';
+
+        aliases.add(`メガ${baseName}${suffix}`);
+        aliases.add(`${baseName}メガ${suffix}`);
+    }
+
+    // ゲンシカイキ
+    if (pRaw.includes('primal')) {
+        aliases.add(`ゲンシ${baseName}`);
+        aliases.add(`${baseName}ゲンシ`);
+    }
+
+    // オリジン・れいじゅう
+    if (pRaw.includes('origin')) {
+        aliases.add(`オリジン${baseName}`);
+    }
+    if (pRaw.includes('therian')) {
+        aliases.add(`れいじゅう${baseName}`);
+        aliases.add(`霊獣${baseName}`);
+    }
+
+    // rawName (PokeAPI英語名)
+    if (p.rawName) {
+        aliases.add(p.rawName);
+    }
+
+    return Array.from(aliases);
+}
+
+function normalizePokemonQuery(str) {
+    if (!str) return '';
+    return str
+        .toLowerCase()
+        .replace(/[\s\u3000\-_・]/g, '') // 空白・ハイフン・中黒・アンダースコアを除去
+        .replace(/[（\(\)）]/g, '');     // 括弧を除去
+}
+
+function findPokemonByQuery(rawVal) {
+    if (!rawVal) return null;
+    const cleanRaw = rawVal.trim();
+    if (!cleanRaw) return null;
+
+    const norm = normalizePokemonQuery(cleanRaw);
+    const normKata = toKatakana(norm);
+    const normHira = toHiragana(norm);
+
+    // 1. 完全一致探索（全エイリアス対象）
+    let matched = pokemonList.find(p => {
+        const aliases = getPokemonAliases(p);
+        return aliases.some(a => {
+            const an = normalizePokemonQuery(a);
+            const aKata = toKatakana(an);
+            const aHira = toHiragana(an);
+            return an === norm || aKata === normKata || aHira === normHira;
+        });
     });
 
-    if (!found) {
-        if (errText) errText.textContent = `「${rawVal}」というポケモンは見つかりませんでした。正式名を入力してください。`;
-        errBox.classList.remove('hidden');
-        return;
+    if (matched) return matched;
+
+    // 2. 前方一致探索（2文字以上の場合）
+    if (normKata.length >= 2) {
+        matched = pokemonList.find(p => {
+            const aliases = getPokemonAliases(p);
+            return aliases.some(a => {
+                const an = normalizePokemonQuery(a);
+                const aKata = toKatakana(an);
+                const aHira = toHiragana(an);
+                return an.startsWith(norm) || aKata.startsWith(normKata) || aHira.startsWith(normHira);
+            });
+        });
     }
+
+    return matched;
+}
+
+// 別の姿（フォルム違い・メガ・合体・リージョン）および種族値同一ポケモンの抽出
+function findFormsAndSameStats(target) {
+    if (!target) return { forms: [], sameStats: [] };
+
+    const formsMap = new Map();
+    const targetBaseName = cleanBaseSpeciesName(target._baseSpeciesName || target.name);
+
+    // 1. 同一 baseId または 同一 baseName を持つすべてのポケモン（通常、メガ、リージョン、各種フォルム）
+    pokemonList.forEach(p => {
+        const pBaseName = cleanBaseSpeciesName(p._baseSpeciesName || p.name);
+        const isSameBaseId = Boolean(target.baseId && p.baseId && p.baseId === target.baseId);
+        const isSameBaseName = Boolean(targetBaseName && pBaseName && pBaseName === targetBaseName);
+
+        if (isSameBaseId || isSameBaseName) {
+            formsMap.set(p.id, p);
+        }
+    });
+
+    // 2. 特殊関連合体フォルム（レイスポス ⇔ バドレックス など）
+    const targetRaw = (target.rawName || '').toLowerCase();
+    const targetName = target.name || '';
+    SPECIAL_RELATED_FORM_GROUPS.forEach(group => {
+        const isMatched = group.rawKeys.some(k => targetRaw.includes(k)) ||
+                          group.keywords.some(k => targetName.includes(k));
+        if (isMatched) {
+            pokemonList.forEach(p => {
+                const pRaw = (p.rawName || '').toLowerCase();
+                const pName = p.name || '';
+                if (group.rawKeys.some(k => pRaw.includes(k)) || group.keywords.some(k => pName.includes(k))) {
+                    formsMap.set(p.id, p);
+                }
+            });
+        }
+    });
+
+    // 別の姿一覧（自身も含め、ユーザーが任意に選択可能にする）
+    const allForms = Array.from(formsMap.values());
+
+    // 3. 全6種族値が完全一致するポケモン（同値）
+    const sameStats = pokemonList.filter(p => {
+        if (formsMap.has(p.id)) return false;
+        return (
+            p.hp === target.hp &&
+            p.atk === target.atk &&
+            p.def === target.def &&
+            p.spa === target.spa &&
+            p.spd === target.spd &&
+            p.spe === target.spe
+        );
+    });
+
+    return {
+        forms: allForms,
+        sameStats: sameStats
+    };
+}
+
+let quizInputDebounceTimer = null;
+
+function handleQuizInputSuggestion() {
+    clearTimeout(quizInputDebounceTimer);
+    quizInputDebounceTimer = setTimeout(() => {
+        const input = document.getElementById('quiz-guess-input');
+        if (!input) return;
+        const rawVal = (input.value || '').trim();
+        if (!rawVal) {
+            closeQuizFormSelectionPanel();
+            return;
+        }
+
+        const matched = findPokemonByQuery(rawVal);
+
+        if (matched) {
+            const { forms, sameStats } = findFormsAndSameStats(matched);
+            // 別の姿が2つ以上ある、または同種族値ポケモンが存在する場合にパネルを表示
+            if (forms.length > 1 || sameStats.length > 0) {
+                renderQuizFormSelectionPanel(matched, forms, sameStats);
+                return;
+            }
+        }
+        closeQuizFormSelectionPanel();
+    }, 200);
+}
+
+function closeQuizFormSelectionPanel() {
+    const panel = document.getElementById('quiz-form-selection-panel');
+    if (panel) {
+        panel.classList.add('hidden');
+        panel.innerHTML = '';
+    }
+}
+
+function renderQuizFormSelectionPanel(matched, forms, sameStats) {
+    const panel = document.getElementById('quiz-form-selection-panel');
+    if (!panel) return;
+
+    panel.classList.remove('hidden');
+
+    function renderPokemonCard(p, isSameStatBadge = false) {
+        const badge = getFormBadgeHtml(p);
+        const isGuessed = quizGuessedList.some(g => g.id === p.id);
+        const disabledClass = isGuessed ? 'opacity-50 cursor-not-allowed bg-slate-100' : 'bg-white hover:bg-rose-50/80 hover:border-rose-300 cursor-pointer hover:shadow-xs active:scale-98';
+
+        return `
+            <button type="button" 
+                ${isGuessed ? 'disabled' : `onclick="selectQuizPokemonToSubmit(${p.id})"`}
+                class="p-2.5 rounded-2xl border border-slate-200 ${disabledClass} transition-all flex items-center justify-between gap-2.5 text-left w-full group">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <img src="${p.image}" class="w-11 h-11 object-contain drop-shadow-xs flex-shrink-0" onerror="this.src='https://placehold.co/44x44/f1f5f9/94a3b8?text=?'">
+                    <div class="min-w-0 flex flex-col gap-0.5">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-xs sm:text-sm font-black text-slate-900 group-hover:text-rose-600 truncate">${p.name}</span>
+                            ${badge}
+                            ${isSameStatBadge ? '<span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">種族値同値</span>' : ''}
+                        </div>
+                        <div class="text-[11px] text-slate-500 font-bold flex items-center gap-1.5">
+                            <span class="text-rose-600 font-black">合計 ${p.total}</span>
+                            <span class="text-slate-400 text-[10px]">(H${p.hp} A${p.atk} B${p.def} C${p.spa} D${p.spd} S${p.spe})</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-shrink-0 text-slate-400 group-hover:text-rose-500 transition-colors">
+                    ${isGuessed ? '<span class="text-[10px] text-slate-400 font-bold">回答済</span>' : '<i class="fa-solid fa-chevron-right text-xs"></i>'}
+                </div>
+            </button>
+        `;
+    }
+
+    let formsHtml = '';
+    if (forms.length > 0) {
+        formsHtml = `
+            <div class="flex flex-col gap-2">
+                <div class="text-[11px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5 px-1">
+                    <i class="fa-solid fa-shapes text-rose-500"></i>
+                    <span>別の姿・関連フォルム一覧 (タップして回答)</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    ${forms.map(p => renderPokemonCard(p, false)).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    let sameStatsHtml = '';
+    if (sameStats.length > 0) {
+        sameStatsHtml = `
+            <div class="flex flex-col gap-2 pt-2 border-t border-slate-100">
+                <div class="text-[11px] font-black text-amber-700 uppercase tracking-wider flex items-center gap-1.5 px-1">
+                    <i class="fa-solid fa-equals text-amber-500"></i>
+                    <span>同じ種族値のポケモン (メロディ完全同一・どちらも正解)</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    ${sameStats.map(p => renderPokemonCard(p, true)).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    panel.innerHTML = `
+        <div class="flex flex-col gap-3 bg-slate-50/70 p-3.5 rounded-2xl border border-slate-200/80">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-700 px-1">
+                <span class="flex items-center gap-1.5 text-slate-900 font-black">
+                    <i class="fa-solid fa-lightbulb text-amber-500"></i>
+                    <span>「${matched.name}」の選択肢一覧：</span>
+                </span>
+                <button type="button" onclick="closeQuizFormSelectionPanel()" class="text-slate-400 hover:text-slate-600 text-xs px-1 cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i> 閉じる
+                </button>
+            </div>
+            ${formsHtml}
+            ${sameStatsHtml}
+        </div>
+    `;
+}
+
+function selectQuizPokemonToSubmit(pokemonId) {
+    const found = pokemonList.find(p => p.id === pokemonId);
+    if (!found) return;
+    closeQuizFormSelectionPanel();
+    const input = document.getElementById('quiz-guess-input');
+    if (input) input.value = '';
+    processQuizAnswer(found);
+}
+
+function processQuizAnswer(found) {
+    const errBox = document.getElementById('quiz-input-error');
+    const errText = document.getElementById('quiz-input-error-text');
+    if (errBox) errBox.classList.add('hidden');
 
     if (quizGuessedList.some(g => g.id === found.id)) {
         if (errText) errText.textContent = `「${found.name}」はすでに回答済みです。`;
-        errBox.classList.remove('hidden');
+        if (errBox) errBox.classList.remove('hidden');
         return;
     }
-
-    input.value = '';
 
     // 1. 完全一致（同ポケモン・フォルム）
     const isExactMatch = (found.id === quizTargetPokemon.id) || 
@@ -1407,6 +1914,40 @@ function handleQuizSubmit(e) {
     if (quizRemainingAttempts <= 0) {
         finishQuiz(false);
     }
+}
+
+function handleQuizSubmit(e) {
+    e.preventDefault();
+    const input = document.getElementById('quiz-guess-input');
+    const errBox = document.getElementById('quiz-input-error');
+    const errText = document.getElementById('quiz-input-error-text');
+    const rawVal = (input.value || '').trim();
+    if (!rawVal) return;
+
+    const found = findPokemonByQuery(rawVal);
+
+    if (!found) {
+        if (errText) errText.textContent = `「${rawVal}」というポケモンは見つかりませんでした。正式名を入力してください。`;
+        errBox.classList.remove('hidden');
+        return;
+    }
+
+    // もし別の姿または同種族値ポケモンが存在する場合、パネルを表示してユーザーが選択できるように促す
+    const { forms, sameStats } = findFormsAndSameStats(found);
+    const panel = document.getElementById('quiz-form-selection-panel');
+    const isPanelOpen = panel && !panel.classList.contains('hidden');
+
+    // パネルがまだ開いておらず、かつ複数の姿や同種族値がある場合はパネルを展開して案内
+    // ※ただしユーザーが「メガリザードンX」のように完全に姿を指定して入力した場合はそのまま回答へ進む
+    const isSpecificFormName = found.formType !== 'normal' && found.name !== (found._baseSpeciesName || '');
+    if ((forms.length > 1 || sameStats.length > 0) && !isPanelOpen && !isSpecificFormName) {
+        renderQuizFormSelectionPanel(found, forms, sameStats);
+        return;
+    }
+
+    closeQuizFormSelectionPanel();
+    input.value = '';
+    processQuizAnswer(found);
 }
 
 function renderQuizHistory() {
@@ -1502,7 +2043,19 @@ function playGuessedSound(id) {
     }
 }
 
-function finishQuiz(isWin, answeredPokemon = null, isSameStatsVariant = false) {
+function confirmGiveUpQuiz() {
+    if (!quizTargetPokemon) return;
+    if (confirm('降参して正解のポケモンを確認しますか？')) {
+        giveUpQuiz();
+    }
+}
+
+function giveUpQuiz() {
+    closeQuizFormSelectionPanel();
+    finishQuiz(false, null, false, true);
+}
+
+function finishQuiz(isWin, answeredPokemon = null, isSameStatsVariant = false, isGaveUp = false) {
     document.getElementById('quiz-playing-screen').classList.add('hidden');
     const resultScreen = document.getElementById('quiz-result-screen');
     resultScreen.classList.remove('hidden');
@@ -1528,6 +2081,12 @@ function finishQuiz(isWin, answeredPokemon = null, isSameStatsVariant = false) {
         } else {
             desc.textContent = `${attemptsUsed}回目の回答で見事正解しました！`;
         }
+    } else if (isGaveUp) {
+        iconWrap.className = 'w-24 h-24 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-md bg-slate-100 text-slate-600 border border-slate-300';
+        iconWrap.innerHTML = '<i class="fa-solid fa-flag text-slate-500"></i>';
+        title.className = 'text-2xl sm:text-3xl font-black text-slate-900';
+        title.textContent = '降参しました';
+        desc.textContent = '正解はこちらのポケモンでした：';
     } else {
         iconWrap.className = 'w-24 h-24 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-md bg-rose-50 text-rose-600 border border-rose-200';
         iconWrap.innerHTML = '<i class="fa-solid fa-skull"></i>';
@@ -1584,248 +2143,5 @@ function finishQuiz(isWin, answeredPokemon = null, isSameStatsVariant = false) {
     }, 400);
 }
 
-/* ==========================================================================
-   アクセス解析ログ & 管理者コンソール ロジック
-   ========================================================================== */
 
-const ANALYTICS_STORAGE_KEY = 'poketone_analytics_logs';
-const ADMIN_PASS_HASH = '94c5011f0628fa6ea95d5223abf16df989b5c3ffdf6a8fb48512dd517ff15ef2'; // 'admin1234' のSHA-256ハッシュ値
-let isAdminAuthenticated = false;
-
-// SHA-256 ハッシュ計算
-async function sha256(str) {
-    const buffer = new TextEncoder().encode(str);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-// ログ保存関数
-function recordAnalyticsLog(type, payload = {}) {
-    try {
-        const now = new Date();
-        const dateStr = now.toISOString();
-        const raw = localStorage.getItem(ANALYTICS_STORAGE_KEY);
-        const data = raw ? JSON.parse(raw) : {
-            description: "Pokétone ユーザー操作ログ・アクセス解析データ",
-            createdAt: dateStr,
-            version: "1.0",
-            summary: { totalSearches: 0, totalSelections: 0 },
-            logs: []
-        };
-
-        if (type === 'SEARCH') {
-            data.summary.totalSearches = (data.summary.totalSearches || 0) + 1;
-            data.logs.unshift({
-                timestamp: dateStr,
-                type: 'SEARCH',
-                keyword: payload.keyword || '',
-                pokemonName: '',
-                pokemonId: null,
-                details: `検索キーワード: ${payload.keyword}`
-            });
-        } else if (type === 'SELECT') {
-            data.summary.totalSelections = (data.summary.totalSelections || 0) + 1;
-            data.logs.unshift({
-                timestamp: dateStr,
-                type: 'SELECT',
-                keyword: '',
-                pokemonName: payload.pokemonName || '',
-                pokemonId: payload.pokemonId || null,
-                details: `図鑑選択: ${payload.pokemonName} (#${payload.pokemonId})`
-            });
-        }
-
-        // 直近1000件までに制限してブラウザストレージの圧迫を防止
-        if (data.logs.length > 1000) {
-            data.logs = data.logs.slice(0, 1000);
-        }
-
-        localStorage.setItem(ANALYTICS_STORAGE_KEY, JSON.stringify(data));
-
-        // 管理者画面が開いていればリアルタイム更新
-        if (isAdminAuthenticated) {
-            renderAdminDashboardData();
-        }
-    } catch (e) {
-        console.warn("Analytics log failed:", e);
-    }
-}
-
-// 管理者モーダル開閉
-function openAdminModal() {
-    const modal = document.getElementById('admin-modal');
-    if (!modal) return;
-    modal.classList.remove('hidden');
-
-    const authSec = document.getElementById('admin-auth-section');
-    const dashSec = document.getElementById('admin-dashboard-section');
-    const passInput = document.getElementById('admin-password-input');
-    const errEl = document.getElementById('admin-auth-error');
-    if (errEl) errEl.classList.add('hidden');
-
-    if (isAdminAuthenticated) {
-        if (authSec) authSec.classList.add('hidden');
-        if (dashSec) dashSec.classList.remove('hidden');
-        renderAdminDashboardData();
-    } else {
-        if (authSec) authSec.classList.remove('hidden');
-        if (dashSec) dashSec.classList.add('hidden');
-        if (passInput) {
-            passInput.value = '';
-            setTimeout(() => passInput.focus(), 100);
-        }
-    }
-}
-
-function closeAdminModal() {
-    const modal = document.getElementById('admin-modal');
-    if (modal) modal.classList.add('hidden');
-}
-
-// 管理者ログイン認証
-async function handleAdminLogin(e) {
-    if (e) e.preventDefault();
-    const passInput = document.getElementById('admin-password-input');
-    const errEl = document.getElementById('admin-auth-error');
-    if (!passInput) return;
-
-    const inputVal = passInput.value.trim();
-    const hashed = await sha256(inputVal);
-
-    // パスワード: admin1234
-    if (hashed === ADMIN_PASS_HASH || inputVal === 'admin1234') {
-        isAdminAuthenticated = true;
-        if (errEl) errEl.classList.add('hidden');
-        document.getElementById('admin-auth-section').classList.add('hidden');
-        document.getElementById('admin-dashboard-section').classList.remove('hidden');
-        renderAdminDashboardData();
-    } else {
-        if (errEl) errEl.classList.remove('hidden');
-        passInput.focus();
-    }
-}
-
-// 管理者ダッシュボードの描画
-function renderAdminDashboardData() {
-    const raw = localStorage.getItem(ANALYTICS_STORAGE_KEY);
-    const data = raw ? JSON.parse(raw) : {
-        summary: { totalSearches: 0, totalSelections: 0 },
-        logs: []
-    };
-
-    const sEl = document.getElementById('admin-total-searches');
-    const selEl = document.getElementById('admin-total-selections');
-    const lEl = document.getElementById('admin-total-logs');
-    const tbody = document.getElementById('admin-logs-table-body');
-
-    if (sEl) sEl.textContent = (data.summary.totalSearches || 0).toLocaleString();
-    if (selEl) selEl.textContent = (data.summary.totalSelections || 0).toLocaleString();
-    if (lEl) lEl.textContent = (data.logs.length || 0).toLocaleString();
-
-    if (tbody) {
-        if (!data.logs || data.logs.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-8 text-center text-slate-400">記録されたログはまだありません</td></tr>`;
-            return;
-        }
-
-        const recentLogs = data.logs.slice(0, 50);
-        tbody.innerHTML = recentLogs.map(l => {
-            const time = new Date(l.timestamp).toLocaleString('ja-JP');
-            const isSearch = l.type === 'SEARCH';
-            const badge = isSearch
-                ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700">検索</span>`
-                : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">選択</span>`;
-            const content = isSearch
-                ? `<span class="font-bold text-indigo-900">「${escapeHtml(l.keyword)}」</span>`
-                : `<span class="font-bold text-emerald-900">${escapeHtml(l.pokemonName)}</span> <span class="text-slate-400 text-[10px]">(ID: ${l.pokemonId})</span>`;
-
-            return `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="px-3 py-2 text-slate-500 whitespace-nowrap">${time}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">${badge}</td>
-                    <td class="px-3 py-2 text-slate-800">${content}</td>
-                </tr>
-            `;
-        }).join('');
-    }
-}
-
-// analytics_data.json のダウンロード
-function downloadAnalyticsJson() {
-    const raw = localStorage.getItem(ANALYTICS_STORAGE_KEY);
-    const data = raw ? JSON.parse(raw) : {
-        description: "Pokétone ユーザー操作ログ・アクセス解析データ",
-        createdAt: new Date().toISOString(),
-        version: "1.0",
-        summary: { totalSearches: 0, totalSelections: 0 },
-        logs: []
-    };
-
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `analytics_data.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-// CSVダウンロード
-function downloadAnalyticsCsv() {
-    const raw = localStorage.getItem(ANALYTICS_STORAGE_KEY);
-    const data = raw ? JSON.parse(raw) : { logs: [] };
-    const logs = data.logs || [];
-
-    let csv = "日時,種別,キーワード,ポケモン名,ポケモンID,詳細\n";
-    logs.forEach(l => {
-        const time = `"${new Date(l.timestamp).toLocaleString('ja-JP')}"`;
-        const type = `"${l.type}"`;
-        const kw = `"${(l.keyword || '').replace(/"/g, '""')}"`;
-        const pName = `"${(l.pokemonName || '').replace(/"/g, '""')}"`;
-        const pId = l.pokemonId ? `"${l.pokemonId}"` : '""';
-        const details = `"${(l.details || '').replace(/"/g, '""')}"`;
-        csv += `${time},${type},${kw},${pName},${pId},${details}\n`;
-    });
-
-    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]); // Excel等での文字化け防止用UTF-8 BOM
-    const blob = new Blob([bom, csv], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `analytics_logs_${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-// ログ初期化
-function clearAnalyticsLogs() {
-    if (!confirm('本当に蓄積されたすべてのログを消去しますか？\n（この操作は元に戻せません）')) {
-        return;
-    }
-    const emptyData = {
-        description: "Pokétone ユーザー操作ログ・アクセス解析データ",
-        createdAt: new Date().toISOString(),
-        version: "1.0",
-        summary: { totalSearches: 0, totalSelections: 0 },
-        logs: []
-    };
-    localStorage.setItem(ANALYTICS_STORAGE_KEY, JSON.stringify(emptyData));
-    renderAdminDashboardData();
-}
-
-// HTMLエスケープヘルパー
-function escapeHtml(str) {
-    if (!str) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
 
