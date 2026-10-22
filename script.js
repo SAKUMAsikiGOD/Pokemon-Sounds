@@ -1788,6 +1788,12 @@ function renderQuizFormSelectionPanel(matched, forms, sameStats) {
         const badge = getFormBadgeHtml(p);
         const isGuessed = quizGuessedList.some(g => g.id === p.id);
         const disabledClass = isGuessed ? 'opacity-50 cursor-not-allowed bg-slate-100' : 'bg-white hover:bg-rose-50/80 hover:border-rose-300 cursor-pointer hover:shadow-xs active:scale-98';
+        const displayId = (p.baseId || p.id).toString().padStart(4, '0');
+
+        const typesHtml = (p.types || []).map(t => {
+            const col = typeColors[t] || { bg: 'bg-slate-500', text: 'text-white' };
+            return `<span class="px-1.5 py-0.5 rounded-md text-[9px] font-bold ${col.bg} ${col.text}">${t}</span>`;
+        }).join('');
 
         return `
             <button type="button" 
@@ -1795,15 +1801,15 @@ function renderQuizFormSelectionPanel(matched, forms, sameStats) {
                 class="p-2.5 rounded-2xl border border-slate-200 ${disabledClass} transition-all flex items-center justify-between gap-2.5 text-left w-full group">
                 <div class="flex items-center gap-2.5 min-w-0">
                     <img src="${p.image}" class="w-11 h-11 object-contain drop-shadow-xs flex-shrink-0" onerror="this.src='https://placehold.co/44x44/f1f5f9/94a3b8?text=?'">
-                    <div class="min-w-0 flex flex-col gap-0.5">
+                    <div class="min-w-0 flex flex-col gap-1">
                         <div class="flex items-center gap-1.5 flex-wrap">
                             <span class="text-xs sm:text-sm font-black text-slate-900 group-hover:text-rose-600 truncate">${p.name}</span>
                             ${badge}
-                            ${isSameStatBadge ? '<span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">種族値同値</span>' : ''}
+                            ${isSameStatBadge ? '<span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">同値</span>' : ''}
                         </div>
-                        <div class="text-[11px] text-slate-500 font-bold flex items-center gap-1.5">
-                            <span class="text-rose-600 font-black">合計 ${p.total}</span>
-                            <span class="text-slate-400 text-[10px]">(H${p.hp} A${p.atk} B${p.def} C${p.spa} D${p.spd} S${p.spe})</span>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-[10px] font-bold text-slate-400">#${displayId}</span>
+                            ${typesHtml}
                         </div>
                     </div>
                 </div>
