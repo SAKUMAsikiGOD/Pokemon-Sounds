@@ -49,6 +49,8 @@ const EMBEDDED_FALLBACK_POKEMON = [
     { id: 133, baseId: 133, name: "イーブイ", _baseSpeciesName: "イーブイ", formType: "normal", formLabel: "通常", types: ["ノーマル"], hp: 55, atk: 55, def: 50, spa: 45, spd: 65, spe: 55, total: 325, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/133.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/133.ogg" },
     { id: 150, baseId: 150, name: "ミュウツー", _baseSpeciesName: "ミュウツー", formType: "normal", formLabel: "通常", types: ["エスパー"], hp: 106, atk: 110, def: 90, spa: 154, spd: 90, spe: 130, total: 680, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/150.ogg" },
     { id: 151, baseId: 151, name: "ミュウ", _baseSpeciesName: "ミュウ", formType: "normal", formLabel: "通常", types: ["エスパー"], hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100, total: 600, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/151.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/151.ogg" },
+    { id: 154, baseId: 154, name: "メガニウム", _baseSpeciesName: "メガニウム", formType: "normal", formLabel: "通常", types: ["くさ"], hp: 80, atk: 82, def: 100, spa: 83, spd: 100, spe: 80, total: 525, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/154.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/154.ogg" },
+    { id: 469, baseId: 469, name: "メガヤンマ", _baseSpeciesName: "メガヤンマ", formType: "normal", formLabel: "通常", types: ["むし", "ひこう"], hp: 86, atk: 76, def: 86, spa: 116, spd: 56, spe: 95, total: 515, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/469.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/469.ogg" },
     { id: 628, baseId: 628, name: "ウォーグル", _baseSpeciesName: "ウォーグル", formType: "normal", formLabel: "通常", types: ["ノーマル", "ひこう"], hp: 100, atk: 123, def: 75, spa: 57, spd: 75, spe: 80, total: 510, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/628.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/628.ogg" },
     { id: 706, baseId: 706, name: "ヌメルゴン", _baseSpeciesName: "ヌメルゴン", formType: "normal", formLabel: "通常", types: ["ドラゴン"], hp: 90, atk: 100, def: 70, spa: 110, spd: 150, spe: 80, total: 600, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/706.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/706.ogg" },
     // メガシンカ
@@ -57,6 +59,8 @@ const EMBEDDED_FALLBACK_POKEMON = [
     { id: 10044, baseId: 150, name: "メガミュウツーY", rawName: "mewtwo-mega-y", _baseSpeciesName: "ミュウツー", formType: "mega", formLabel: "メガシンカY", types: ["エスパー"], hp: 106, atk: 150, def: 70, spa: 194, spd: 120, spe: 140, total: 780, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10044.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10044.ogg" },
     { id: 10059, baseId: 448, name: "メガルカリオ", rawName: "lucario-mega", _baseSpeciesName: "ルカリオ", formType: "mega", formLabel: "メガシンカ", types: ["かくとう", "はがね"], hp: 70, atk: 145, def: 88, spa: 140, spd: 70, spe: 112, total: 625, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10059.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10059.ogg" },
     { id: 10038, baseId: 94, name: "メガゲンガー", rawName: "gengar-mega", _baseSpeciesName: "ゲンガー", formType: "mega", formLabel: "メガシンカ", types: ["ゴースト", "どく"], hp: 60, atk: 65, def: 80, spa: 170, spd: 95, spe: 130, total: 600, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10038.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10038.ogg" },
+    { id: 10282, baseId: 154, name: "メガメガニウム", rawName: "meganium-mega", _baseSpeciesName: "メガニウム", formType: "mega", formLabel: "メガシンカ", types: ["くさ", "フェアリー"], hp: 80, atk: 92, def: 115, spa: 143, spd: 115, spe: 80, total: 625, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10282.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/154.ogg" },
+    { id: 10999, baseId: 469, name: "メガメガヤンマ", rawName: "yanmega-mega", _baseSpeciesName: "メガヤンマ", formType: "mega", formLabel: "メガシンカ", types: ["むし", "ひこう"], hp: 86, atk: 86, def: 96, spa: 156, spd: 76, spe: 115, total: 615, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/469.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/469.ogg" },
     // 全リージョンフォーム (アローラ・ガラル・ヒスイ・パルデア)
     { id: 10091, baseId: 19, name: "コラッタ (アローラのすがた)", rawName: "rattata-alola", _baseSpeciesName: "コラッタ", formType: "regional", formLabel: "アローラ", types: ["あく", "ノーマル"], hp: 30, atk: 56, def: 35, spa: 25, spd: 35, spe: 72, total: 253, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10091.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10091.ogg" },
     { id: 10092, baseId: 20, name: "ラッタ (アローラのすがた)", rawName: "raticate-alola", _baseSpeciesName: "ラッタ", formType: "regional", formLabel: "アローラ", types: ["あく", "ノーマル"], hp: 75, atk: 71, def: 70, spa: 40, spd: 80, spe: 77, total: 413, image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10092.png", cry: "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10092.ogg" },
@@ -225,14 +229,31 @@ function shouldExcludePokemon(rawName, id, baseId) {
 // ポケモンの基本種族名（メガ、ゲンシ、リージョン名、フォルム名などの付加情報を除去した純粋な名前）を取得
 function cleanBaseSpeciesName(name) {
     if (!name) return '';
-    let s = String(name);
-    // メガ、ゲンシを先頭から除去
-    s = s.replace(/^(メガ|ゲンシ)/, '');
-    // 末尾のメガシンカ記号 (X, Y, Z) を除去
-    s = s.replace(/[XYZ]$/, '');
+    let s = String(name).trim();
+
     // 半角・全角の丸括弧以降（「 (ヒスイのすがた)」「（ガラルのすがた）」等）をすべて一括除去
     // 複数回連結されている場合でも、最初の丸括弧から後ろをすべて切り落とす
-    s = s.replace(/[\s\u3000]*[\(\uff08].*$/, '');
+    s = s.replace(/[\s\u3000]*[\(\uff08].*$/, '').trim();
+
+    // 「メガニウム」「メガヤンマ」のように元の種族名自体に「メガ」が含まれるポケモンの特殊処理
+    // 例: 「メガメガニウム」 -> 「メガニウム」 / 「メガニウム」 -> 「メガニウム」（先頭のメガを削らない）
+    if (/^メガメガニウム/i.test(s)) {
+        s = s.replace(/^メガ/, '');
+    } else if (/^メガメガヤンマ/i.test(s)) {
+        s = s.replace(/^メガ/, '');
+    } else if (/^メガニウム/i.test(s) || /^メガヤンマ/i.test(s)) {
+        // 元々の種族名が「メガニウム」「メガヤンマ」なので先頭の「メガ」は削らない
+    } else {
+        // 通常のポケモン：先頭の「メガ」「ゲンシ」を除去（例: メガルカリオ -> ルカリオ）
+        s = s.replace(/^(メガ|ゲンシ)/, '');
+    }
+
+    // 末尾のメガシンカ記号 (X, Y, Z) を除去
+    // ※ ポリゴンZなどの通常種名の末尾Zを誤って削らないよう保護
+    if (s !== 'ポリゴンZ') {
+        s = s.replace(/[XYZ]$/, '');
+    }
+
     return s.trim();
 }
 
@@ -244,7 +265,7 @@ function determineFormInfo(rawName, id, speciesName) {
         return {
             formType: 'normal',
             formLabel: '通常',
-            displayName: baseName || speciesName
+            displayName: speciesName || baseName
         };
     }
 
@@ -473,9 +494,9 @@ function updateFormCounts() {
 }
 
 async function fetchOptimizedPokemonData() {
-    const CACHE_KEY = 'poketone_clean_v7';
-    // 既存キャッシュからキョダイマックス・重複姿を除外し、ガラルヤドラン修正・ヒスイウォーグル・パルデアケンタロス全3種を反映
-    const cached = localStorage.getItem(CACHE_KEY) || localStorage.getItem('poketone_clean_v6') || localStorage.getItem('poketone_clean_v5') || localStorage.getItem('poketone_clean_v4') || localStorage.getItem('poketone_clean_v3') || localStorage.getItem('poketone_clean_v2') || localStorage.getItem('poketone_clean_v1') || localStorage.getItem('pokestats_master_v1351_all_forms');
+    const CACHE_KEY = 'poketone_clean_v8';
+    // 既存キャッシュからキョダイマックス・重複姿を除外し、ガラルヤドラン修正・ヒスイウォーグル・パルデアケンタロス全3種・メガメガニウム・メガメガヤンマを反映
+    const cached = localStorage.getItem(CACHE_KEY) || localStorage.getItem('poketone_clean_v7') || localStorage.getItem('poketone_clean_v6') || localStorage.getItem('poketone_clean_v5') || localStorage.getItem('poketone_clean_v4') || localStorage.getItem('poketone_clean_v3') || localStorage.getItem('poketone_clean_v2') || localStorage.getItem('poketone_clean_v1') || localStorage.getItem('pokestats_master_v1351_all_forms');
     if (cached) {
         try {
             const rawList = JSON.parse(cached);
@@ -494,6 +515,23 @@ async function fetchOptimizedPokemonData() {
                         p.hp = 95; p.atk = 100; p.def = 95; p.spa = 100; p.spd = 70; p.spe = 30; p.total = 490;
                         p.image = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10165.png';
                         p.cry = 'https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/10165.ogg';
+                    }
+                    // メガニウム (ID 154) / メガヤンマ (ID 469) の旧キャッシュ自動修復
+                    if (p.id === 154) {
+                        p.name = 'メガニウム';
+                        p._baseSpeciesName = 'メガニウム';
+                        p.formType = 'normal';
+                        p.formLabel = '通常';
+                    } else if (p.id === 469) {
+                        p.name = 'メガヤンマ';
+                        p._baseSpeciesName = 'メガヤンマ';
+                        p.formType = 'normal';
+                        p.formLabel = '通常';
+                    } else if (p.id === 10282) {
+                        p.name = 'メガメガニウム';
+                        p._baseSpeciesName = 'メガニウム';
+                        p.formType = 'mega';
+                        p.formLabel = 'メガシンカ';
                     }
                     if (p.cry && p.cry.includes('/sprites/pokemon/latest/')) {
                         p.cry = p.cry.replace('/sprites/pokemon/latest/', '/cries/pokemon/latest/');
@@ -1615,6 +1653,24 @@ function getPokemonAliases(p) {
 
         aliases.add(`メガ${baseName}${suffix}`);
         aliases.add(`${baseName}メガ${suffix}`);
+        aliases.add(`${baseName}(メガシンカ)${suffix}`);
+        aliases.add(`${baseName} (メガシンカ)${suffix}`);
+        aliases.add(`${baseName}(メガ)${suffix}`);
+        aliases.add(`${baseName} (メガ)${suffix}`);
+
+        // メガメガニウム / メガメガヤンマ専用エイリアス強化
+        if (baseName === 'メガニウム') {
+            aliases.add('メガメガニウム');
+            aliases.add('メガニウムメガ');
+            aliases.add('メガニウム(メガシンカ)');
+            aliases.add('メガニウム (メガシンカ)');
+        }
+        if (baseName === 'メガヤンマ') {
+            aliases.add('メガメガヤンマ');
+            aliases.add('メガヤンマメガ');
+            aliases.add('メガヤンマ(メガシンカ)');
+            aliases.add('メガヤンマ (メガシンカ)');
+        }
     }
 
     // ゲンシカイキ
