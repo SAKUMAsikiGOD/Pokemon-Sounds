@@ -1401,10 +1401,129 @@ function playStatMelody(p) {
 // クイズモード実装ロジック
 // ==========================================
 let quizCurrentMode = 'normal'; // 'normal' (ノーマル) | 'hard' (ハード)
-let quizTargetPokemon = null;
+let quizIsPlaying = false; // クイズ進行中フラグ (セキュリティ監視連動)
 let quizRemainingAttempts = 10;
 const QUIZ_MAX_ATTEMPTS = 10;
 let quizGuessedList = []; // 回答済みポケモンオブジェクトの履歴配列
+
+// ==========================================
+// 不正防止・セキュリティ強化ロジック
+// ==========================================
+// 正解ポケモンの完全隠蔽（コンソールや開発者ツールからのカンニング防止）
+let _secretQuizTarget = null;
+let _revealedQuizTarget = null;
+
+// window.quizTargetPokemon に対するコンソール直接アクセスの防御プロテクト
+Object.defineProperty(window, 'quizTargetPokemon', {
+    get() {
+        if (quizIsPlaying) {
+            console.warn('%c🛡️ セキュリティ警告: クイズプレイ中の正解データへの直接参照はブロックされています。', 'color: #ef4444; font-weight: 900; font-size: 13px;');
+            return undefined;
+        }
+        return _revealedQuizTarget;
+    },
+    set(val) {
+        _revealedQuizTarget = val;
+    },
+    configurable: true
+});
+
+// セキュリティ警告トースト通知の表示
+function showSecurityToast(message) {
+    const toast = document.getElementById('quiz-security-toast');
+    const text = document.getElementById('quiz-security-toast-text');
+    if (!toast || !text) return;
+    text.textContent = message;
+    toast.classList.remove('opacity-0', '-translate-y-4');
+    toast.classList.add('opacity-100', 'translate-y-0');
+    clearTimeout(window._quizToastTimer);
+    window._quizToastTimer = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', '-translate-y-4');
+    }, 2800);
+}
+
+// 1. 開発者ツールショートカット (F12, Ctrl+Shift+I/J/C, Ctrl+U) のブロック
+window.addEventListener('keydown', (e) => {
+    if (!quizIsPlaying) return;
+
+    // F12キー
+    if (e.key === 'F12' || e.keyCode === 123) {
+        e.preventDefault();
+        e.stopPropagation();
+        showSecurityToast('🛡️ クイズ中は開発者ツール (F12) の起動は禁止されています');
+        return false;
+    }
+
+    // Ctrl + Shift + I/J/C (インスペクター・コンソール・要素検証)
+    if (e.ctrlKey && e.shiftKey && (['I', 'i', 'J', 'j', 'C', 'c'].includes(e.key) || [73, 74, 67].includes(e.keyCode))) {
+        e.preventDefault();
+        e.stopPropagation();
+        showSecurityToast('🛡️ クイズ中は開発者ツールのショートカットは無効化されています');
+        return false;
+    }
+
+    // Ctrl + U (ソース表示)
+    if (e.ctrlKey && (['U', 'u'].includes(e.key) || e.keyCode === 85)) {
+        e.preventDefault();
+        e.stopPropagation();
+        showSecurityToast('🛡️ クイズ中はソース表示は無効化されています');
+        return false;
+    }
+}, true);
+
+// 2. 右クリック (コンテキストメニュー・検証) のブロック
+window.addEventListener('contextmenu', (e) => {
+    if (quizIsPlaying) {
+        e.preventDefault();
+        showSecurityToast('🛡️ クイズ中は右クリック（要素検証メニュー）は無効化されています');
+        return false;
+    }
+}, true);
+
+// 3. 別タブ・別ウィンドウ・画面離脱（カンニング）の検知・ペナルティ
+let quizBlurCount = 0;
+let isShowingBlurWarning = false;
+
+function handleQuizVisibilityOrBlur() {
+    if (!quizIsPlaying || isShowingBlurWarning) return;
+
+    // 画面が非表示、またはフォーカスが別ウィンドウに移った場合
+    if (document.hidden || !document.hasFocus()) {
+        quizBlurCount++;
+        const countEl = document.getElementById('quiz-blur-warning-count');
+        if (countEl) countEl.textContent = quizBlurCount;
+
+        if (quizBlurCount === 1) {
+            isShowingBlurWarning = true;
+            stopQuizWave();
+            if (window.activeAudioTimeout) clearTimeout(window.activeAudioTimeout);
+            const warningModal = document.getElementById('quiz-blur-warning-modal');
+            if (warningModal) warningModal.classList.remove('hidden');
+        } else if (quizBlurCount >= 2) {
+            // 2回以上の離脱でカンニング防止ルールによる失格
+            isShowingBlurWarning = false;
+            const warningModal = document.getElementById('quiz-blur-warning-modal');
+            if (warningModal) warningModal.classList.add('hidden');
+            finishQuiz(false, null, false, false, true); // isDisqualified = true
+        }
+    }
+}
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) handleQuizVisibilityOrBlur();
+});
+window.addEventListener('blur', () => {
+    handleQuizVisibilityOrBlur();
+});
+
+function resumeFromBlurWarning() {
+    isShowingBlurWarning = false;
+    const warningModal = document.getElementById('quiz-blur-warning-modal');
+    if (warningModal) warningModal.classList.add('hidden');
+    const input = document.getElementById('quiz-guess-input');
+    if (input) input.focus();
+}
 
 function openQuizModal() {
     if (pokemonList.length === 0) {
@@ -1420,6 +1539,12 @@ function openQuizModal() {
 }
 
 function closeQuizModal() {
+    quizIsPlaying = false;
+    _secretQuizTarget = null;
+    isShowingBlurWarning = false;
+    const warningModal = document.getElementById('quiz-blur-warning-modal');
+    if (warningModal) warningModal.classList.add('hidden');
+
     const modal = document.getElementById('quiz-modal');
     modal.classList.add('opacity-0');
     setTimeout(() => {
@@ -1442,6 +1567,12 @@ function stopQuizWave() {
 }
 
 function backToQuizModeSelect() {
+    quizIsPlaying = false;
+    _secretQuizTarget = null;
+    isShowingBlurWarning = false;
+    const warningModal = document.getElementById('quiz-blur-warning-modal');
+    if (warningModal) warningModal.classList.add('hidden');
+
     document.getElementById('quiz-mode-select-screen').classList.remove('hidden');
     document.getElementById('quiz-playing-screen').classList.add('hidden');
     document.getElementById('quiz-result-screen').classList.add('hidden');
@@ -1454,6 +1585,10 @@ function startQuiz(mode) {
     quizCurrentMode = mode;
     quizRemainingAttempts = QUIZ_MAX_ATTEMPTS;
     quizGuessedList = [];
+    quizBlurCount = 0;
+    isShowingBlurWarning = false;
+    const warningModal = document.getElementById('quiz-blur-warning-modal');
+    if (warningModal) warningModal.classList.add('hidden');
 
     // 出題候補の絞り込み
     let candidates = [];
@@ -1471,7 +1606,9 @@ function startQuiz(mode) {
     }
 
     const randIdx = Math.floor(Math.random() * candidates.length);
-    quizTargetPokemon = candidates[randIdx];
+    _secretQuizTarget = candidates[randIdx];
+    _revealedQuizTarget = null;
+    quizIsPlaying = true; // セキュリティ監視開始 & window.quizTargetPokemon を不可視化
 
     document.getElementById('quiz-mode-select-screen').classList.add('hidden');
     document.getElementById('quiz-playing-screen').classList.remove('hidden');
@@ -1517,14 +1654,15 @@ function renderQuizHearts() {
 }
 
 function playQuizTargetMelody() {
-    if (!quizTargetPokemon) return;
+    const target = _secretQuizTarget || _revealedQuizTarget;
+    if (!target) return;
     const btn = document.getElementById('quiz-play-target-btn');
     if (btn) {
         btn.classList.add('ring-4', 'ring-amber-400/60');
         setTimeout(() => btn.classList.remove('ring-4', 'ring-amber-400/60'), 1800);
     }
     triggerQuizWave(2.6);
-    playStatMelody(quizTargetPokemon);
+    playStatMelody(target);
 }
 
 // 特殊合体・関連フォルムグループの定義（レイスポス、ブリザポス、バドレックス、キュレム、ネクロズマ等）
@@ -1937,6 +2075,9 @@ function processQuizAnswer(found) {
     const errText = document.getElementById('quiz-input-error-text');
     if (errBox) errBox.classList.add('hidden');
 
+    const target = _secretQuizTarget || _revealedQuizTarget;
+    if (!target) return;
+
     if (quizGuessedList.some(g => g.id === found.id)) {
         if (errText) errText.textContent = `「${found.name}」はすでに回答済みです。`;
         if (errBox) errBox.classList.remove('hidden');
@@ -1944,20 +2085,20 @@ function processQuizAnswer(found) {
     }
 
     // 1. 完全一致（同ポケモン・フォルム）
-    const isExactMatch = (found.id === quizTargetPokemon.id) || 
-                         (found.baseId === quizTargetPokemon.baseId && found.name === quizTargetPokemon.name);
+    const isExactMatch = (found.id === target.id) || 
+                         (found.baseId === target.baseId && found.name === target.name);
 
     // 2. 種族値完全一致判定（6ステータスが全て同値）
     // リザードンとバクフーン、コラッタとアローラコラッタ、ロコンとアローラロコンなど、
     // 種族値（メロディ）が完全に同一のポケモンであればどちらを答えても正解
     // ※ メガシンカと通常は種族値が異なるため明確に区別されます
     const isSameStats = (
-        found.hp === quizTargetPokemon.hp &&
-        found.atk === quizTargetPokemon.atk &&
-        found.def === quizTargetPokemon.def &&
-        found.spa === quizTargetPokemon.spa &&
-        found.spd === quizTargetPokemon.spd &&
-        found.spe === quizTargetPokemon.spe
+        found.hp === target.hp &&
+        found.atk === target.atk &&
+        found.def === target.def &&
+        found.spa === target.spa &&
+        found.spd === target.spd &&
+        found.spe === target.spe
     );
 
     if (isExactMatch || isSameStats) {
@@ -2028,10 +2169,13 @@ function renderQuizHistory() {
         return;
     }
 
+    const target = _secretQuizTarget || _revealedQuizTarget;
+    const targetTotal = target ? target.total : 0;
+
     list.innerHTML = quizGuessedList.map((p, idx) => {
         const displayId = (p.baseId || p.id).toString().padStart(4, '0');
         const badge = getFormBadgeHtml(p);
-        const diffTotal = p.total - quizTargetPokemon.total;
+        const diffTotal = p.total - targetTotal;
         let diffBadge = '';
         if (diffTotal > 0) {
             diffBadge = `<span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">合計 ${p.total} (正解より +${diffTotal})</span>`;
@@ -2106,7 +2250,8 @@ function playGuessedSound(id) {
 }
 
 function confirmGiveUpQuiz() {
-    if (!quizTargetPokemon) return;
+    const target = _secretQuizTarget || _revealedQuizTarget;
+    if (!target) return;
     if (confirm('降参して正解のポケモンを確認しますか？')) {
         giveUpQuiz();
     }
@@ -2117,7 +2262,13 @@ function giveUpQuiz() {
     finishQuiz(false, null, false, true);
 }
 
-function finishQuiz(isWin, answeredPokemon = null, isSameStatsVariant = false, isGaveUp = false) {
+function finishQuiz(isWin, answeredPokemon = null, isSameStatsVariant = false, isGaveUp = false, isDisqualified = false) {
+    quizIsPlaying = false; // クイズ終了 (セキュリティ監視解除 & 正解プロパティ参照可能化)
+    _revealedQuizTarget = _secretQuizTarget;
+    isShowingBlurWarning = false;
+    const warningModal = document.getElementById('quiz-blur-warning-modal');
+    if (warningModal) warningModal.classList.add('hidden');
+
     document.getElementById('quiz-playing-screen').classList.add('hidden');
     const resultScreen = document.getElementById('quiz-result-screen');
     resultScreen.classList.remove('hidden');
@@ -2127,7 +2278,9 @@ function finishQuiz(isWin, answeredPokemon = null, isSameStatsVariant = false, i
     const desc = document.getElementById('quiz-result-desc');
     const card = document.getElementById('quiz-result-pokemon-card');
 
-    const p = quizTargetPokemon;
+    const p = _revealedQuizTarget || _secretQuizTarget;
+    if (!p) return;
+
     const badge = getFormBadgeHtml(p);
     const displayId = (p.baseId || p.id).toString().padStart(4, '0');
 
@@ -2143,6 +2296,12 @@ function finishQuiz(isWin, answeredPokemon = null, isSameStatsVariant = false, i
         } else {
             desc.textContent = `${attemptsUsed}回目の回答で見事正解しました！`;
         }
+    } else if (isDisqualified) {
+        iconWrap.className = 'w-24 h-24 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-md bg-amber-50 text-amber-600 border border-amber-200 animate-pulse';
+        iconWrap.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-amber-500"></i>';
+        title.className = 'text-2xl sm:text-3xl font-black text-rose-600';
+        title.textContent = '失格 (カンニング防止)';
+        desc.textContent = 'クイズプレイ中に画面や別タブから複数回離脱したため、不正防止ルールにより失格となりました。正解はこちらのポケモンでした：';
     } else if (isGaveUp) {
         iconWrap.className = 'w-24 h-24 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-md bg-slate-100 text-slate-600 border border-slate-300';
         iconWrap.innerHTML = '<i class="fa-solid fa-flag text-slate-500"></i>';
@@ -2190,7 +2349,7 @@ function finishQuiz(isWin, answeredPokemon = null, isSameStatsVariant = false, i
                 </div>
             </div>
             <div class="flex gap-2.5 mt-2">
-                <button type="button" onclick="playStatMelody(quizTargetPokemon)"
+                <button type="button" onclick="playStatMelody(_revealedQuizTarget || _secretQuizTarget)"
                     class="px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 cursor-pointer">
                     <i class="fa-solid fa-music"></i>
                     <span>メロディをもう一度聴く</span>
