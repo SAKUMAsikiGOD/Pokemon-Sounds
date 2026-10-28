@@ -7,7 +7,7 @@
     <title>Pokétone</title>
     <!-- コンテンツセキュリティポリシー (CSP: 外部スクリプトインジェクション・不正通信の防止) -->
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://raw.githubusercontent.com https://placehold.co; media-src 'self' data: blob: https://raw.githubusercontent.com; connect-src 'self' https://pokeapi.co https://raw.githubusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self';">
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' https://pokeapi.co https://raw.githubusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self';">
 
     <!-- Tailwind CSS (ユーティリティファーストCSSフレームワーク / バージョン固定) -->
     <script src="https://cdn.tailwindcss.com/3.4.17"></script>
@@ -30,37 +30,367 @@
 <body class="min-h-screen text-slate-800 flex flex-col">
 
     <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center space-x-3">
+        <div class="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchAppMode('quiz')">
                 <div
-                    class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center border-4 border-white shadow-md">
-                    <i class="fa-solid fa-bolt text-white text-lg"></i>
+                    class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-red-500 to-rose-600 flex items-center justify-center border-2 border-white/20 shadow-md">
+                    <i class="fa-solid fa-headphones text-white text-lg"></i>
                 </div>
                 <div>
                     <h1 class="text-xl sm:text-2xl font-black tracking-wider flex items-center gap-2">
                         <span>Pokétone</span>
                     </h1>
+                    <p class="text-[10px] text-slate-400 font-bold hidden sm:block">ポケモン種族値音あてクイズ</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end flex-wrap">
-                <button onclick="openQuizModal()"
-                    class="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-lg text-xs font-black transition-all shadow-md flex items-center gap-1.5 cursor-pointer hover:scale-105"
-                    title="種族値クイズに挑戦する">
-                    <i class="fa-solid fa-gamepad text-amber-200"></i>
-                    <span>クイズモード</span>
-                </button>
+
+            <!-- メイン/サブ モード切替タブナビゲーション -->
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end flex-wrap">
+                <div class="flex items-center p-1 bg-slate-800/90 rounded-2xl border border-slate-700/80 shadow-inner">
+                    <button id="nav-btn-quiz" type="button" onclick="switchAppMode('quiz')"
+                        class="px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-md cursor-pointer">
+                        <i class="fa-solid fa-gamepad"></i>
+                        <span>クイズ</span>
+                    </button>
+                    <button id="nav-btn-pokedex" type="button" onclick="switchAppMode('pokedex')"
+                        class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition-all flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-book-open"></i>
+                        <span>ポケモン図鑑</span>
+                    </button>
+                </div>
+
                 <div
-                    class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-2">
+                    class="text-xs bg-slate-800 text-slate-300 px-3 py-2 rounded-xl border border-slate-700 flex items-center gap-2">
                     <i class="fa-solid fa-database text-red-400"></i>
-                    <span>読込済み: <strong id="loaded-count" class="text-white">0</strong> / <span
-                            id="total-target-count">1257</span> 匹</span>
+                    <span>読込: <strong id="loaded-count" class="text-white">0</strong> / <span
+                            id="total-target-count">1257</span></span>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- 固定追従フローティングトリガー & アコーディオンパネル -->
-    <div id="sticky-search-wrapper" class="sticky top-0 z-40 w-full pointer-events-none transition-all duration-300">
+    <div id="loading-banner"
+        class="bg-gradient-to-r from-red-600 via-purple-600 to-indigo-600 text-white px-4 py-2 text-center text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-inner">
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        <span id="loading-text">データを取得中...</span>
+        <div class="w-32 bg-slate-900/40 h-2 rounded-full overflow-hidden ml-4 hidden sm:block">
+            <div id="loading-progress" class="bg-white h-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 【メイン機能】クイズモード メインビュー -->
+    <!-- ======================================================== -->
+    <main id="quiz-main-view" class="flex-grow max-w-5xl w-full mx-auto px-4 py-6 sm:py-8 flex flex-col items-center relative font-sans select-none">
+
+        <!-- 背景のほんのりとしたグラデーション装飾 -->
+        <div class="absolute inset-0 pointer-events-none opacity-40 overflow-hidden -z-10">
+            <div class="absolute -top-32 -left-32 w-80 h-80 bg-red-100 rounded-full blur-3xl"></div>
+            <div class="absolute top-1/2 -right-32 w-80 h-80 bg-amber-100 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-32 left-1/3 w-80 h-80 bg-indigo-50 rounded-full blur-3xl"></div>
+        </div>
+
+        <!-- ================= 画面 1: 難易度・モード選択 ================= -->
+        <div id="quiz-mode-select-screen" class="max-w-2xl w-full flex flex-col gap-6 my-auto py-8">
+            <div class="text-center flex flex-col gap-2">
+                <div
+                    class="inline-flex items-center justify-center mx-auto w-16 h-16 rounded-2xl bg-white border border-slate-200 text-rose-500 text-3xl shadow-sm mb-2">
+                    <i class="fa-solid fa-headphones"></i>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-wide">どの難易度に挑戦する？</h2>
+                <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                    10回ミスする前に正解のポケモンを当てよう！不正解のときはそのポケモンの音・ステータスがヒントとして開示されます。
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                <!-- ノーマルモードカード -->
+                <button type="button" onclick="startQuiz('normal')"
+                    class="p-6 rounded-3xl bg-white hover:bg-emerald-50/40 border-2 border-slate-200 hover:border-emerald-500 transition-all text-left flex flex-col justify-between gap-4 group cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-0.5">
+                    <div class="flex justify-between items-start">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                        <span
+                            class="text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">おすすめ</span>
+                    </div>
+                    <div>
+                        <div
+                            class="text-base font-black text-slate-900 group-hover:text-emerald-700 transition-colors">
+                            ノーマルモード</div>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                            最終進化形・単一形態・メガシンカなど、主要ポケモンのみから出題。
+                        </p>
+                    </div>
+                    <div class="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                        <span>挑戦する</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </button>
+
+                <!-- ハードモードカード -->
+                <button type="button" onclick="startQuiz('hard')"
+                    class="p-6 rounded-3xl bg-white hover:bg-rose-50/40 border-2 border-slate-200 hover:border-rose-500 transition-all text-left flex flex-col justify-between gap-4 group cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-0.5">
+                    <div class="flex justify-between items-start">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-fire"></i>
+                        </div>
+                        <span
+                            class="text-[10px] font-black bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full">超難関</span>
+                    </div>
+                    <div>
+                        <div
+                            class="text-base font-black text-slate-900 group-hover:text-rose-700 transition-colors">
+                            ハードモード</div>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                            進化前・中間進化・別フォルムを含む全1257匹のポケモンから出題。
+                        </p>
+                    </div>
+                    <div class="text-xs font-bold text-rose-600 flex items-center gap-1">
+                        <span>挑戦する</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </button>
+            </div>
+
+            <!-- ポケモン図鑑への予習案内リンクカード -->
+            <div class="bg-white/80 backdrop-blur-sm p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row justify-between items-center gap-3 mt-2">
+                <div class="flex items-center gap-3 text-left">
+                    <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-book-open text-sm"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-slate-800">ポケモンのメロディを事前に予習したい方へ</span>
+                        <p class="text-[11px] text-slate-500">図鑑モードで各ポケモンの種族値音を自由に試聴できます</p>
+                    </div>
+                </div>
+                <button type="button" onclick="switchAppMode('pokedex')"
+                    class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all border border-slate-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+                    <span>図鑑モードを見る</span>
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= 画面 2: クイズプレイ画面 ================= -->
+        <div id="quiz-playing-screen" class="max-w-3xl w-full flex flex-col gap-6 hidden pb-12">
+
+            <!-- クイズモード表示＆戻るバー -->
+            <div class="flex justify-between items-center bg-white px-4 py-2.5 rounded-2xl border border-slate-200 shadow-xs">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-slate-500">難易度:</span>
+                    <span id="quiz-badge-mode" class="text-xs bg-rose-50 text-rose-600 border border-rose-200 px-2.5 py-0.5 rounded-full font-bold"></span>
+                </div>
+                <button type="button" onclick="backToQuizModeSelect()"
+                    class="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-list text-[10px]"></i>
+                    <span>難易度選択へ</span>
+                </button>
+            </div>
+
+            <!-- 残機・ステータスバー -->
+            <div
+                class="bg-white rounded-2xl p-4 border border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3 shadow-sm">
+                <div class="flex items-center gap-3 flex-wrap justify-center sm:justify-start">
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">残機 (ミス許容):</span>
+                    <div id="quiz-heart-container" class="flex gap-1.5 text-base text-rose-500">
+                        <!-- 10個のハートアイコンが動的生成されます -->
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 flex-wrap justify-center sm:justify-end">
+                    <div id="quiz-cry-hint-status" class="flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-xl bg-slate-100 text-slate-600 border border-slate-200">
+                        <i class="fa-solid fa-volume-high text-slate-400" id="quiz-cry-hint-icon"></i>
+                        <span id="quiz-cry-hint-status-text">鳴き声ヒント: 5問ミスで解放 (あと5回)</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-bold text-slate-600">
+                        <span>残り回答可能数:</span>
+                        <span id="quiz-remaining-attempts" class="text-lg font-black text-rose-600">10</span>
+                        <span class="text-slate-400">/ 10</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 音響ステージ & サウンドビジュアライザー -->
+            <div
+                class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm flex flex-col items-center gap-6 relative overflow-hidden">
+                <div class="text-center">
+                    <span
+                        class="text-[11px] font-black tracking-widest uppercase text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1 rounded-full">
+                        TARGET MELODY
+                    </span>
+                    <h3 class="text-lg sm:text-xl font-black text-slate-900 mt-2.5">このポケモンの種族値音を当てよう</h3>
+                    <p class="text-xs text-slate-500 mt-1">HP → こうげき → ぼうぎょ → とくこう → とくぼう → すばやさ → 合計音 の順に流れます</p>
+                </div>
+
+                <!-- サウンド波形バーアニメーション -->
+                <div class="flex items-end justify-center gap-1.5 h-14 w-full max-w-xs px-4">
+                    <div class="quiz-wave-bar w-3 bg-red-400 rounded-full h-6 transition-all duration-300"></div>
+                    <div class="quiz-wave-bar w-3 bg-orange-400 rounded-full h-10 transition-all duration-300"></div>
+                    <div class="quiz-wave-bar w-3 bg-amber-400 rounded-full h-14 transition-all duration-300"></div>
+                    <div class="quiz-wave-bar w-3 bg-emerald-400 rounded-full h-8 transition-all duration-300"></div>
+                    <div class="quiz-wave-bar w-3 bg-sky-400 rounded-full h-12 transition-all duration-300"></div>
+                    <div class="quiz-wave-bar w-3 bg-indigo-400 rounded-full h-9 transition-all duration-300"></div>
+                    <div class="quiz-wave-bar w-3 bg-purple-400 rounded-full h-14 transition-all duration-300"></div>
+                </div>
+
+                <!-- サウンドコントロール操作ボタン -->
+                <div class="flex flex-wrap justify-center gap-3 w-full">
+                    <button type="button" id="quiz-play-target-btn" onclick="playQuizTargetMelody()"
+                        class="px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-2xl text-sm font-black shadow-md shadow-red-500/20 transition-all flex items-center gap-2.5 cursor-pointer hover:scale-102 active:scale-98">
+                        <i class="fa-solid fa-play text-base"></i>
+                        <span>正解のメロディを聴く</span>
+                    </button>
+                    <!-- 5問ミスで解放される正解ポケモンの鳴き声ヒントボタン -->
+                    <button type="button" id="quiz-cry-hint-btn" onclick="playQuizTargetCryHint()"
+                        class="px-5 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white rounded-2xl text-sm font-black shadow-md shadow-amber-500/20 transition-all flex items-center gap-2 cursor-pointer hover:scale-102 active:scale-98 hidden"
+                        title="正解ポケモンの鳴き声を聴く">
+                        <i class="fa-solid fa-volume-high text-base"></i>
+                        <span>正解の鳴き声を聴く (ヒント)</span>
+                    </button>
+                    <button type="button" onclick="playMewMelodyDirectly()"
+                        class="px-5 py-3 bg-slate-50 hover:bg-slate-100 text-pink-700 rounded-2xl text-sm font-bold transition-all border border-pink-200 flex items-center gap-2 cursor-pointer hover:scale-102 active:scale-98"
+                        title="全ステータスが100のミュウの基準音を聴く">
+                        <i class="fa-solid fa-cat text-pink-500"></i>
+                        <span>ミュウの基準音 (All 100)</span>
+                    </button>
+                    <button type="button" onclick="confirmGiveUpQuiz()"
+                        class="px-4 py-3 bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-2xl text-sm font-bold transition-all border border-slate-200 hover:border-rose-200 flex items-center gap-2 cursor-pointer hover:scale-102 active:scale-98"
+                        title="降参して正解のポケモンを確認する">
+                        <i class="fa-solid fa-flag text-slate-400 group-hover:text-rose-500"></i>
+                        <span>降参する</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 回答入力フォーム -->
+            <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm flex flex-col gap-3">
+                <form id="quiz-answer-form" onsubmit="handleQuizSubmit(event)" class="flex flex-col gap-2">
+                    <label for="quiz-guess-input"
+                        class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-pen-nib text-rose-500"></i>
+                        <span>ポケモン名を入力して回答</span>
+                    </label>
+                    <div class="flex gap-2.5">
+                        <div class="relative flex-grow">
+                            <span
+                                class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </span>
+                            <input type="text" id="quiz-guess-input" autocomplete="off"
+                                placeholder="ポケモンの名前を入力 (例: ヒスイウォーグル, ガラルヤドラン, パルデアケンタロス)..."
+                                class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white focus:border-transparent text-slate-900 text-sm sm:text-base font-bold placeholder-slate-400 transition-all">
+                        </div>
+                        <button type="submit"
+                            class="px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-sm font-black transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer hover:scale-102 active:scale-98 whitespace-nowrap">
+                            <i class="fa-solid fa-paper-plane text-xs"></i>
+                            <span>回答</span>
+                        </button>
+                    </div>
+                    <div id="quiz-input-error"
+                        class="text-xs text-rose-600 font-bold hidden px-2 pt-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span id="quiz-input-error-text"></span>
+                    </div>
+                </form>
+
+                <!-- 別の姿・同種族値ポケモンの選択肢パネル -->
+                <div id="quiz-form-selection-panel"
+                    class="hidden mt-1 pt-3 border-t border-slate-100 flex flex-col gap-3">
+                    <!-- 動的生成される選択肢カード群 -->
+                </div>
+            </div>
+
+            <!-- 回答履歴 & 種族値比較一覧デッキ -->
+            <div class="flex flex-col gap-3">
+                <div class="flex justify-between items-center px-1">
+                    <div class="text-xs font-black uppercase tracking-wider text-slate-600 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-simple text-rose-500"></i>
+                        <span>回答履歴・種族値サウンド比較</span>
+                    </div>
+                    <span id="quiz-history-count" class="text-xs font-bold text-slate-400">0 / 10 試行</span>
+                </div>
+
+                <div id="quiz-history-list" class="flex flex-col gap-3">
+                    <!-- JavaScriptにより回答カードが動的挿入されます -->
+                    <div id="quiz-history-empty"
+                        class="text-center py-10 bg-white rounded-2xl border border-dashed border-slate-200 text-slate-400 text-xs shadow-xs">
+                        回答すると、そのポケモンの音とステータス値が表示され、正解との違いを聴き比べることができます。
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================= 画面 3: 結果発表サマリー ================= -->
+        <div id="quiz-result-screen" class="max-w-xl w-full flex flex-col gap-6 my-auto py-8 text-center hidden">
+            <div id="quiz-result-icon-wrap"
+                class="w-24 h-24 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-md border">
+            </div>
+
+            <div>
+                <h2 id="quiz-result-title" class="text-2xl sm:text-3xl font-black"></h2>
+                <p id="quiz-result-desc" class="text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed"></p>
+            </div>
+
+            <!-- 正解ポケモンの開示カード -->
+            <div id="quiz-result-pokemon-card"
+                class="bg-white rounded-3xl p-6 border border-slate-200 shadow-md flex flex-col sm:flex-row items-center gap-6 text-left">
+                <!-- JavaScriptにより正解データが動的挿入されます -->
+            </div>
+
+            <div class="flex flex-wrap gap-3 justify-center pt-2">
+                <button type="button" onclick="restartQuizSameMode()"
+                    class="px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-sm font-black transition-all shadow-md flex items-center gap-2 cursor-pointer hover:scale-102 active:scale-98">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>同じ難易度でもう一度遊ぶ</span>
+                </button>
+                <button type="button" onclick="backToQuizModeSelect()"
+                    class="px-5 py-3.5 bg-white hover:bg-slate-100 text-slate-700 rounded-2xl text-sm font-bold transition-all border border-slate-200 shadow-xs flex items-center gap-2 cursor-pointer hover:scale-102 active:scale-98">
+                    <i class="fa-solid fa-list"></i>
+                    <span>難易度選択へ</span>
+                </button>
+                <button type="button" onclick="switchAppMode('pokedex')"
+                    class="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-sm font-bold transition-all border border-slate-200 shadow-xs flex items-center gap-2 cursor-pointer hover:scale-102 active:scale-98">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>図鑑で調べる</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 画面離脱・カンニング防止警告オーバーレイ -->
+        <div id="quiz-blur-warning-modal"
+            class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden transition-opacity duration-300">
+            <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border-2 border-rose-500 flex flex-col items-center text-center gap-4">
+                <div class="w-16 h-16 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-3xl">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-black text-slate-900">⚠️ 画面離脱を検知しました！</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
+                        クイズプレイ中に別タブや外部アプリを開く行為（カンニング防止）は禁止されています。<br>
+                        <span class="font-bold text-rose-600 mt-1 block">※もう一度画面から離脱した場合、失格（ゲームオーバー）となります！</span>
+                    </p>
+                </div>
+                <button type="button" onclick="resumeFromBlurWarning()"
+                    class="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl text-sm font-black transition-all shadow-md cursor-pointer hover:scale-102 active:scale-98">
+                    ルールを理解してクイズに戻る
+                </button>
+            </div>
+        </div>
+
+        <!-- セキュリティショートカット・右クリックブロック警告トースト -->
+        <div id="quiz-security-toast"
+            class="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white px-5 py-3 rounded-2xl text-xs sm:text-sm font-black shadow-2xl border border-slate-700/80 flex items-center gap-2.5 pointer-events-none transition-all duration-300 opacity-0 -translate-y-4">
+            <i class="fa-solid fa-ban text-rose-500 text-base"></i>
+            <span id="quiz-security-toast-text">クイズ中は開発者ツール・右クリックは無効化されています</span>
+        </div>
+
+    </main>
+
+    <!-- 固定追従フローティングトリガー & アコーディオンパネル（図鑑モード用） -->
+    <div id="sticky-search-wrapper" class="sticky top-0 z-40 w-full pointer-events-none transition-all duration-300 hidden">
         <!-- アコーディオン式ドロワー（全検索・絞り込みUI） -->
         <div id="sticky-search-drawer"
             class="pointer-events-auto max-h-0 opacity-0 overflow-hidden transition-all duration-300 ease-in-out bg-white border-b border-slate-200 shadow-2xl">
@@ -146,16 +476,30 @@
         </div>
     </div>
 
-    <div id="loading-banner"
-        class="bg-gradient-to-r from-red-600 via-purple-600 to-indigo-600 text-white px-4 py-2 text-center text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-inner">
-        <i class="fa-solid fa-spinner fa-spin"></i>
-        <span id="loading-text">データを取得中...</span>
-        <div class="w-32 bg-slate-900/40 h-2 rounded-full overflow-hidden ml-4 hidden sm:block">
-            <div id="loading-progress" class="bg-white h-full transition-all duration-300" style="width: 0%"></div>
-        </div>
-    </div>
+    <!-- ======================================================== -->
+    <!-- ポケモン図鑑 ビュー (初期状態: 非表示) -->
+    <!-- ======================================================== -->
+    <main id="pokedex-sub-view" class="flex-grow max-w-7xl w-full mx-auto px-4 py-6 flex flex-col gap-6 hidden">
 
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
+        <!-- 図鑑案内バナー ＆ クイズへ戻るボタン -->
+        <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-700 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-red-500/20 border border-red-500/30 text-red-400 flex items-center justify-center text-xl flex-shrink-0">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm sm:text-base font-black">ポケモン図鑑</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-0.5">全ポケモンの種族値を聴いて研究できます。</p>
+                </div>
+            </div>
+            <button type="button" onclick="switchAppMode('quiz')"
+                class="px-5 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl text-xs sm:text-sm font-black shadow-md flex items-center gap-2 cursor-pointer transition-all hover:scale-105 active:scale-95 whitespace-nowrap">
+                <i class="fa-solid fa-gamepad text-amber-200"></i>
+                <span>クイズに戻る</span>
+            </button>
+        </div>
 
         <!-- 検索・絞り込みカード -->
         <div id="search-card" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col gap-4">
@@ -258,301 +602,6 @@
         </div>
 
     </main>
-
-    <!-- クイズ機能 全画面モーダル -->
-    <div id="quiz-modal"
-        class="fixed inset-0 z-50 bg-slate-50 text-slate-800 flex flex-col hidden opacity-0 transition-opacity duration-300 overflow-hidden font-sans select-none">
-
-        <!-- 背景のほんのりとしたグラデーション光 -->
-        <div class="absolute inset-0 pointer-events-none opacity-40 overflow-hidden">
-            <div class="absolute -top-32 -left-32 w-80 h-80 bg-red-100 rounded-full blur-3xl"></div>
-            <div class="absolute top-1/2 -right-32 w-80 h-80 bg-amber-100 rounded-full blur-3xl"></div>
-            <div class="absolute -bottom-32 left-1/3 w-80 h-80 bg-indigo-50 rounded-full blur-3xl"></div>
-        </div>
-
-        <!-- クイズ上部ヘッダーナビゲーション -->
-        <header
-            class="relative z-10 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 sm:px-8 py-3.5 flex justify-between items-center shadow-xs">
-            <div class="flex items-center gap-3">
-                <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-white shadow-sm">
-                    <i class="fa-solid fa-gamepad text-lg"></i>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm sm:text-base font-black tracking-wider text-slate-900">種族値音あてクイズ</span>
-                        <span id="quiz-badge-mode"
-                            class="text-[11px] bg-rose-50 text-rose-600 border border-rose-200 px-2.5 py-0.5 rounded-full font-bold"></span>
-                    </div>
-                    <p class="text-[11px] text-slate-500 hidden sm:block">ポケモンの6つの種族値が奏でるメロディを聴いて当てよう</p>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-2">
-                <button type="button" onclick="closeQuizModal()"
-                    class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-bold transition-all border border-slate-200 flex items-center gap-1.5 cursor-pointer">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    <span>図鑑へ戻る</span>
-                </button>
-            </div>
-        </header>
-
-        <!-- メインクイズビューポート（スクロール可能） -->
-        <main class="relative z-10 flex-grow overflow-y-auto px-4 py-6 sm:py-8 flex flex-col items-center">
-
-            <!-- ================= 画面 1: 難易度・モード選択 ================= -->
-            <div id="quiz-mode-select-screen" class="max-w-2xl w-full flex flex-col gap-6 my-auto py-8">
-                <div class="text-center flex flex-col gap-2">
-                    <div
-                        class="inline-flex items-center justify-center mx-auto w-16 h-16 rounded-2xl bg-white border border-slate-200 text-rose-500 text-3xl shadow-sm mb-2">
-                        <i class="fa-solid fa-headphones"></i>
-                    </div>
-                    <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-wide">どの難易度に挑戦する？</h2>
-                    <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
-                        10回ミスする前に正解のポケモンを当てよう！不正解のときはそのポケモンの音・ステータスがヒントとして開示されます。
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-                    <!-- ノーマルモードカード -->
-                    <button type="button" onclick="startQuiz('normal')"
-                        class="p-6 rounded-3xl bg-white hover:bg-emerald-50/40 border-2 border-slate-200 hover:border-emerald-500 transition-all text-left flex flex-col justify-between gap-4 group cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-0.5">
-                        <div class="flex justify-between items-start">
-                            <div
-                                class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-star"></i>
-                            </div>
-                            <span
-                                class="text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">おすすめ</span>
-                        </div>
-                        <div>
-                            <div
-                                class="text-base font-black text-slate-900 group-hover:text-emerald-700 transition-colors">
-                                ノーマルモード</div>
-                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-                                最終進化形・単一形態・メガシンカなど、主要ポケモンのみから出題。
-                            </p>
-                        </div>
-                        <div class="text-xs font-bold text-emerald-600 flex items-center gap-1">
-                            <span>挑戦する</span>
-                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                        </div>
-                    </button>
-
-                    <!-- ハードモードカード -->
-                    <button type="button" onclick="startQuiz('hard')"
-                        class="p-6 rounded-3xl bg-white hover:bg-rose-50/40 border-2 border-slate-200 hover:border-rose-500 transition-all text-left flex flex-col justify-between gap-4 group cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-0.5">
-                        <div class="flex justify-between items-start">
-                            <div
-                                class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-fire"></i>
-                            </div>
-                            <span
-                                class="text-[10px] font-black bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full">超難関</span>
-                        </div>
-                        <div>
-                            <div
-                                class="text-base font-black text-slate-900 group-hover:text-rose-700 transition-colors">
-                                ハードモード</div>
-                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-                                進化前・中間進化・別フォルムを含む全1257匹のポケモンから出題。
-                            </p>
-                        </div>
-                        <div class="text-xs font-bold text-rose-600 flex items-center gap-1">
-                            <span>挑戦する</span>
-                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                        </div>
-                    </button>
-                </div>
-            </div>
-
-            <!-- ================= 画面 2: クイズプレイ画面 ================= -->
-            <div id="quiz-playing-screen" class="max-w-3xl w-full flex flex-col gap-6 hidden pb-12">
-
-                <!-- 残機・ステータスバー -->
-                <div
-                    class="bg-white rounded-2xl p-4 border border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3 shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">残機 (ミス許容):</span>
-                        <div id="quiz-heart-container" class="flex gap-1.5 text-base text-rose-500">
-                            <!-- 10個のハートアイコンが動的生成されます -->
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2 text-xs font-bold text-slate-600">
-                        <span>残り回答可能数:</span>
-                        <span id="quiz-remaining-attempts" class="text-lg font-black text-rose-600">10</span>
-                        <span class="text-slate-400">/ 10</span>
-                    </div>
-                </div>
-
-                <!-- 音響ステージ & サウンドビジュアライザー -->
-                <div
-                    class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm flex flex-col items-center gap-6 relative overflow-hidden">
-                    <div class="text-center">
-                        <span
-                            class="text-[11px] font-black tracking-widest uppercase text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1 rounded-full">
-                            TARGET MELODY
-                        </span>
-                        <h3 class="text-lg sm:text-xl font-black text-slate-900 mt-2.5">このポケモンの種族値音を当てよう</h3>
-                        <p class="text-xs text-slate-500 mt-1">HP → こうげき → ぼうぎょ → とくこう → とくぼう → すばやさ → 合計音 の順に流れます</p>
-                    </div>
-
-                    <!-- サウンド波形バーアニメーション -->
-                    <div class="flex items-end justify-center gap-1.5 h-16 w-full max-w-xs px-4">
-                        <div class="quiz-wave-bar w-3 bg-red-400 rounded-full h-6 transition-all duration-300"></div>
-                        <div class="quiz-wave-bar w-3 bg-orange-400 rounded-full h-10 transition-all duration-300">
-                        </div>
-                        <div class="quiz-wave-bar w-3 bg-amber-400 rounded-full h-14 transition-all duration-300"></div>
-                        <div class="quiz-wave-bar w-3 bg-emerald-400 rounded-full h-8 transition-all duration-300">
-                        </div>
-                        <div class="quiz-wave-bar w-3 bg-sky-400 rounded-full h-12 transition-all duration-300"></div>
-                        <div class="quiz-wave-bar w-3 bg-indigo-400 rounded-full h-9 transition-all duration-300"></div>
-                        <div class="quiz-wave-bar w-3 bg-purple-400 rounded-full h-16 transition-all duration-300">
-                        </div>
-                    </div>
-
-                    <!-- サウンドコントロール操作ボタン -->
-                    <div class="flex flex-wrap justify-center gap-3 w-full">
-                        <button type="button" id="quiz-play-target-btn" onclick="playQuizTargetMelody()"
-                            class="px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-2xl text-sm font-black shadow-md shadow-red-500/20 transition-all flex items-center gap-2.5 cursor-pointer hover:scale-102 active:scale-98">
-                            <i class="fa-solid fa-play text-base"></i>
-                            <span>正解のメロディを聴く</span>
-                        </button>
-                        <button type="button" onclick="playMewMelodyDirectly()"
-                            class="px-5 py-3 bg-slate-50 hover:bg-slate-100 text-pink-700 rounded-2xl text-sm font-bold transition-all border border-pink-200 flex items-center gap-2 cursor-pointer hover:scale-102 active:scale-98"
-                            title="全ステータスが100のミュウの基準音を聴く">
-                            <i class="fa-solid fa-cat text-pink-500"></i>
-                            <span>ミュウの基準音 (All 100)</span>
-                        </button>
-                        <button type="button" onclick="confirmGiveUpQuiz()"
-                            class="px-4 py-3 bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-2xl text-sm font-bold transition-all border border-slate-200 hover:border-rose-200 flex items-center gap-2 cursor-pointer hover:scale-102 active:scale-98"
-                            title="降参して正解のポケモンを確認する">
-                            <i class="fa-solid fa-flag text-slate-400 group-hover:text-rose-500"></i>
-                            <span>降参する</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 回答入力フォーム -->
-                <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm flex flex-col gap-3">
-                    <form id="quiz-answer-form" onsubmit="handleQuizSubmit(event)" class="flex flex-col gap-2">
-                        <label for="quiz-guess-input"
-                            class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                            <i class="fa-solid fa-pen-nib text-rose-500"></i>
-                            <span>ポケモン名を入力して回答</span>
-                        </label>
-                        <div class="flex gap-2.5">
-                            <div class="relative flex-grow">
-                                <span
-                                    class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-                                    <i class="fa-solid fa-magnifying-glass"></i>
-                                </span>
-                                <input type="text" id="quiz-guess-input" autocomplete="off"
-                                    placeholder="ポケモンの名前を入力 (例: ヒスイウォーグル, ガラルヤドラン, パルデアケンタロス)..."
-                                    class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white focus:border-transparent text-slate-900 text-sm sm:text-base font-bold placeholder-slate-400 transition-all">
-                            </div>
-                            <button type="submit"
-                                class="px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-sm font-black transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer hover:scale-102 active:scale-98 whitespace-nowrap">
-                                <i class="fa-solid fa-paper-plane text-xs"></i>
-                                <span>回答</span>
-                            </button>
-                        </div>
-                        <div id="quiz-input-error"
-                            class="text-xs text-rose-600 font-bold hidden px-2 pt-1 flex items-center gap-1.5">
-                            <i class="fa-solid fa-circle-exclamation"></i>
-                            <span id="quiz-input-error-text"></span>
-                        </div>
-                    </form>
-
-                    <!-- 別の姿・同種族値ポケモンの選択肢パネル -->
-                    <div id="quiz-form-selection-panel"
-                        class="hidden mt-1 pt-3 border-t border-slate-100 flex flex-col gap-3">
-                        <!-- 動的生成される選択肢カード群 -->
-                    </div>
-                </div>
-
-                <!-- 回答履歴 & 種族値比較一覧デッキ -->
-                <div class="flex flex-col gap-3">
-                    <div class="flex justify-between items-center px-1">
-                        <div class="text-xs font-black uppercase tracking-wider text-slate-600 flex items-center gap-2">
-                            <i class="fa-solid fa-chart-simple text-rose-500"></i>
-                            <span>回答履歴・種族値サウンド比較</span>
-                        </div>
-                        <span id="quiz-history-count" class="text-xs font-bold text-slate-400">0 / 10 試行</span>
-                    </div>
-
-                    <div id="quiz-history-list" class="flex flex-col gap-3">
-                        <!-- JavaScriptにより回答カードが動的挿入されます -->
-                        <div id="quiz-history-empty"
-                            class="text-center py-10 bg-white rounded-2xl border border-dashed border-slate-200 text-slate-400 text-xs shadow-xs">
-                            回答すると、そのポケモンの音とステータス値が表示され、正解との違いを聴き比べることができます。
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- ================= 画面 3: 結果発表サマリー ================= -->
-            <div id="quiz-result-screen" class="max-w-xl w-full flex flex-col gap-6 my-auto py-8 text-center hidden">
-                <div id="quiz-result-icon-wrap"
-                    class="w-24 h-24 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-md border">
-                </div>
-
-                <div>
-                    <h2 id="quiz-result-title" class="text-2xl sm:text-3xl font-black"></h2>
-                    <p id="quiz-result-desc" class="text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed"></p>
-                </div>
-
-                <!-- 正解ポケモンの開示カード -->
-                <div id="quiz-result-pokemon-card"
-                    class="bg-white rounded-3xl p-6 border border-slate-200 shadow-md flex flex-col sm:flex-row items-center gap-6 text-left">
-                    <!-- JavaScriptにより正解データが動的挿入されます -->
-                </div>
-
-                <div class="flex flex-wrap gap-3 justify-center pt-2">
-                    <button type="button" onclick="restartQuizSameMode()"
-                        class="px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-sm font-black transition-all shadow-md flex items-center gap-2 cursor-pointer hover:scale-102 active:scale-98">
-                        <i class="fa-solid fa-rotate-right"></i>
-                        <span>同じ難易度でもう一度遊ぶ</span>
-                    </button>
-                    <button type="button" onclick="backToQuizModeSelect()"
-                        class="px-5 py-3.5 bg-white hover:bg-slate-100 text-slate-700 rounded-2xl text-sm font-bold transition-all border border-slate-200 shadow-xs flex items-center gap-2 cursor-pointer hover:scale-102 active:scale-98">
-                        <i class="fa-solid fa-list"></i>
-                        <span>難易度選択へ</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- 画面離脱・カンニング防止警告オーバーレイ -->
-            <div id="quiz-blur-warning-modal"
-                class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden transition-opacity duration-300">
-                <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border-2 border-rose-500 flex flex-col items-center text-center gap-4">
-                    <div class="w-16 h-16 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-3xl">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-black text-slate-900">⚠️ 画面離脱を検知しました！</h3>
-                        <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
-                            クイズプレイ中に別タブや外部アプリを開く行為（カンニング防止）は禁止されています。<br>
-                            <span class="font-bold text-rose-600 mt-1 block">※もう一度画面から離脱した場合、失格（ゲームオーバー）となります！</span>
-                        </p>
-                    </div>
-                    <button type="button" onclick="resumeFromBlurWarning()"
-                        class="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl text-sm font-black transition-all shadow-md cursor-pointer hover:scale-102 active:scale-98">
-                        ルールを理解してクイズに戻る
-                    </button>
-                </div>
-            </div>
-
-            <!-- セキュリティショートカット・右クリックブロック警告トースト -->
-            <div id="quiz-security-toast"
-                class="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white px-5 py-3 rounded-2xl text-xs sm:text-sm font-black shadow-2xl border border-slate-700/80 flex items-center gap-2.5 pointer-events-none transition-all duration-300 opacity-0 -translate-y-4">
-                <i class="fa-solid fa-ban text-rose-500 text-base"></i>
-                <span id="quiz-security-toast-text">クイズ中は開発者ツール・右クリックは無効化されています</span>
-            </div>
-
-        </main>
-    </div>
 
     <!-- 詳細情報モーダル -->
     <div id="detail-modal"
