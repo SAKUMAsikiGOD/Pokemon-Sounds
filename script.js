@@ -34,7 +34,30 @@ const typeEnToJp = {
     "grass": "くさ", "ice": "こおり", "fighting": "かくとう", "poison": "どく",
     "ground": "じめん", "flying": "ひこう", "psychic": "エスパー", "bug": "むし",
     "rock": "いわ", "ghost": "ゴースト", "dragon": "ドラゴン", "dark": "あく",
-    "steel": "はがね", "fairy": "フェアリー"
+};
+
+// オフライン・通信遮断時でも100%確実に表示される安全なインラインSVGモンスターボール
+const POKEBALL_FALLBACK_SVG = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23ef4444' stroke='%231e293b' stroke-width='6'/%3E%3Cpath d='M 4 50 A 46 46 0 0 0 96 50 Z' fill='%23ffffff' stroke='%231e293b' stroke-width='6'/%3E%3Cline x1='4' y1='50' x2='96' y2='50' stroke='%231e293b' stroke-width='6'/%3E%3Ccircle cx='50' cy='50' r='14' fill='%23ffffff' stroke='%231e293b' stroke-width='6'/%3E%3Ccircle cx='50' cy='50' r='6' fill='%2394a3b8'/%3E%3C/svg%3E";
+window.POKEBALL_FALLBACK_SVG = POKEBALL_FALLBACK_SVG;
+
+// 画像ロードエラー時の安全な多段階フォールバック処理（特殊フォルム破損時は通常種アートワークへ、それでもダメならモンスターボールへ）
+window.handlePokemonImageError = function(imgEl, baseId) {
+    if (!imgEl) return;
+    imgEl.onerror = null; // 無限ループ抑止
+
+    // 1. 特殊フォルム等の画像が取得できない場合、まず通常種(baseId)の公式アートワークを試す
+    if (baseId && !imgEl.dataset.fallbackAttempted) {
+        imgEl.dataset.fallbackAttempted = 'base';
+        imgEl.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${baseId}.png`;
+        imgEl.onerror = function() {
+            this.onerror = null;
+            this.src = POKEBALL_FALLBACK_SVG;
+        };
+        return;
+    }
+
+    // 2. それでも取得できない場合は確実にインラインSVGモンスターボールを表示
+    imgEl.src = POKEBALL_FALLBACK_SVG;
 };
 
 const EMBEDDED_FALLBACK_POKEMON = [
@@ -396,6 +419,7 @@ function closeCustomAlert() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    switchAppMode('quiz'); // クイズモードを初期表示（メイン機能）
     renderTypeFilters();
     initFormFilterEvents();
     fetchOptimizedPokemonData();
@@ -1000,7 +1024,7 @@ function renderNextBatch() {
                     </div>
                 </div>
                 <div class="my-2 flex justify-center">
-                    <img src="${p.image}" alt="${p.name}" width="112" height="112" loading="lazy" decoding="async" class="w-28 h-28 object-contain group-hover:scale-110 transition-transform duration-300" onerror="this.src='https://placehold.co/150x150/f1f5f1/94a3b8?text=No+Image'">
+                    <img src="${p.image || POKEBALL_FALLBACK_SVG}" alt="${p.name}" width="112" height="112" loading="lazy" decoding="async" class="w-28 h-28 object-contain group-hover:scale-110 transition-transform duration-300" onerror="handlePokemonImageError(this, ${p.baseId || p.id})">
                 </div>
                 <div class="flex flex-col gap-2">
                     <h3 class="text-sm sm:text-base font-bold text-slate-800 text-center line-clamp-1" title="${p.name}">${p.name}</h3>
@@ -1088,7 +1112,7 @@ function openDetailModal(p) {
         </div>
         <div class="p-6 flex flex-col gap-6">
             <div class="flex flex-col sm:flex-row items-center gap-6 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                <img src="${p.image}" alt="${p.name}" class="w-36 h-36 object-contain drop-shadow-md" onerror="this.src='https://placehold.co/150x150/f1f5f1/94a3b8?text=No+Image'">
+                <img src="${p.image || POKEBALL_FALLBACK_SVG}" alt="${p.name}" class="w-36 h-36 object-contain drop-shadow-md" onerror="handlePokemonImageError(this, ${p.baseId || p.id})">
                 <div class="flex flex-col gap-2.5 w-full">
                     <button onclick="playPokemonCrySafeCurrent()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer">
                         <i class="fa-solid fa-volume-high"></i>
@@ -1378,6 +1402,15 @@ function playStatMelody(p) {
     let ticking = false;
 
     window.addEventListener('scroll', () => {
+        if (currentAppMode !== 'pokedex') {
+            if (isVisible) {
+                isVisible = false;
+                toggleBtn.classList.remove('visible');
+                if (isDrawerOpen) closeDrawer();
+            }
+            return;
+        }
+
         if (!ticking) {
             window.requestAnimationFrame(() => {
                 const y = window.scrollY;
@@ -1396,6 +1429,11 @@ function playStatMelody(p) {
         }
     }, { passive: true });
 })();
+
+// ==========================================
+// アプリモード管理 (クイズ主役 / 図鑑サブ機能)
+// ==========================================
+let currentAppMode = 'quiz'; // 'quiz' (メイン) | 'pokedex' (サブ)
 
 // ==========================================
 // クイズモード実装ロジック
@@ -1525,38 +1563,76 @@ function resumeFromBlurWarning() {
     if (input) input.focus();
 }
 
-function openQuizModal() {
-    if (pokemonList.length === 0) {
-        showAlert('ポケモンデータを取得中です。少々お待ちください。');
-        return;
+// ==========================================
+// メイン/サブ モード切替制御 (クイズ主役 / 図鑑サブ)
+// ==========================================
+function switchAppMode(mode) {
+    if (mode === 'pokedex' && quizIsPlaying) {
+        if (!confirm('クイズプレイ中です。図鑑を開くと現在のクイズは降参（終了）扱いとなります。\n図鑑を開きますか？')) {
+            return;
+        }
+        giveUpQuiz();
     }
-    const modal = document.getElementById('quiz-modal');
-    modal.classList.remove('hidden');
-    requestAnimationFrame(() => {
-        modal.classList.remove('opacity-0');
-    });
-    backToQuizModeSelect();
+
+    currentAppMode = mode;
+
+    const quizView = document.getElementById('quiz-main-view');
+    const pokedexView = document.getElementById('pokedex-sub-view');
+    const stickyWrapper = document.getElementById('sticky-search-wrapper');
+    const navBtnQuiz = document.getElementById('nav-btn-quiz');
+    const navBtnPokedex = document.getElementById('nav-btn-pokedex');
+
+    if (mode === 'quiz') {
+        if (quizView) quizView.classList.remove('hidden');
+        if (pokedexView) pokedexView.classList.add('hidden');
+        if (stickyWrapper) stickyWrapper.classList.add('hidden');
+
+        // ナビボタンのハイライト更新
+        if (navBtnQuiz) {
+            navBtnQuiz.className = 'px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-md cursor-pointer';
+        }
+        if (navBtnPokedex) {
+            navBtnPokedex.className = 'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition-all flex items-center gap-2 cursor-pointer';
+        }
+
+        // もしクイズ進行中でなく、結果画面も非表示なら難易度選択画面に戻る
+        const isResultScreenHidden = document.getElementById('quiz-result-screen')?.classList.contains('hidden') ?? true;
+        if (!quizIsPlaying && isResultScreenHidden) {
+            backToQuizModeSelect();
+        }
+    } else {
+        if (quizView) quizView.classList.add('hidden');
+        if (pokedexView) pokedexView.classList.remove('hidden');
+        if (stickyWrapper) stickyWrapper.classList.remove('hidden');
+
+        // ナビボタンのハイライト更新
+        if (navBtnQuiz) {
+            navBtnQuiz.className = 'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition-all flex items-center gap-2 cursor-pointer';
+        }
+        if (navBtnPokedex) {
+            navBtnPokedex.className = 'px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-md cursor-pointer';
+        }
+
+        // 図鑑のカード描画を最新化
+        filterAndRenderPokemon();
+    }
+
+    // 画面トップへスムーズに移動
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function openQuizModal() {
+    switchAppMode('quiz');
 }
 
 function closeQuizModal() {
-    quizIsPlaying = false;
-    _secretQuizTarget = null;
-    isShowingBlurWarning = false;
-    const warningModal = document.getElementById('quiz-blur-warning-modal');
-    if (warningModal) warningModal.classList.add('hidden');
-
-    const modal = document.getElementById('quiz-modal');
-    modal.classList.add('opacity-0');
-    setTimeout(() => {
-        modal.classList.add('hidden');
-    }, 300);
-    stopQuizWave();
-    if (window.activeAudioTimeout) clearTimeout(window.activeAudioTimeout);
+    switchAppMode('pokedex');
 }
 
 function triggerQuizWave(durationSec) {
     const bars = document.querySelectorAll('.quiz-wave-bar');
     bars.forEach(b => b.classList.add('playing'));
+
     setTimeout(() => {
         bars.forEach(b => b.classList.remove('playing'));
     }, (durationSec || 2.4) * 1000);
@@ -1564,6 +1640,47 @@ function triggerQuizWave(durationSec) {
 
 function stopQuizWave() {
     document.querySelectorAll('.quiz-wave-bar').forEach(b => b.classList.remove('playing'));
+}
+
+function updateQuizCryHintState() {
+    const cryBtn = document.getElementById('quiz-cry-hint-btn');
+    const statusBox = document.getElementById('quiz-cry-hint-status');
+    const statusText = document.getElementById('quiz-cry-hint-status-text');
+    const statusIcon = document.getElementById('quiz-cry-hint-icon');
+
+    const wrongCount = quizGuessedList.length;
+    const requiredWrong = 5;
+
+    if (wrongCount >= requiredWrong) {
+        // 5問以上間違えた場合: 鳴き声ヒント解放！
+        if (cryBtn) cryBtn.classList.remove('hidden');
+        if (statusBox) {
+            statusBox.className = 'flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 animate-pulse';
+        }
+        if (statusIcon) statusIcon.className = 'fa-solid fa-volume-high text-amber-500';
+        if (statusText) statusText.textContent = '🔊 鳴き声ヒント解放中！';
+    } else {
+        // 5問未満の場合: 解放までカウントダウン
+        const remaining = requiredWrong - wrongCount;
+        if (cryBtn) cryBtn.classList.add('hidden');
+        if (statusBox) {
+            statusBox.className = 'flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-xl bg-slate-100 text-slate-600 border border-slate-200';
+        }
+        if (statusIcon) statusIcon.className = 'fa-solid fa-volume-high text-slate-400';
+        if (statusText) statusText.textContent = `鳴き声ヒント: 5問ミスで解放 (あと${remaining}回)`;
+    }
+}
+
+function playQuizTargetCryHint() {
+    const target = _secretQuizTarget || _revealedQuizTarget;
+    if (!target) return;
+    if (quizGuessedList.length < 5 && quizIsPlaying) {
+        showSecurityToast('鳴き声ヒントは5問間違えると解放されます。');
+        return;
+    }
+
+    triggerQuizWave(1.8);
+    playPokemonCrySafe(target);
 }
 
 function backToQuizModeSelect() {
@@ -1579,6 +1696,7 @@ function backToQuizModeSelect() {
     document.getElementById('quiz-badge-mode').textContent = '';
     closeQuizFormSelectionPanel();
     stopQuizWave();
+    updateQuizCryHintState();
 }
 
 function startQuiz(mode) {
@@ -1607,6 +1725,9 @@ function startQuiz(mode) {
 
     const randIdx = Math.floor(Math.random() * candidates.length);
     _secretQuizTarget = candidates[randIdx];
+    if (_secretQuizTarget && !_secretQuizTarget.image) {
+        _secretQuizTarget.image = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${_secretQuizTarget.baseId || _secretQuizTarget.id}.png`;
+    }
     _revealedQuizTarget = null;
     quizIsPlaying = true; // セキュリティ監視開始 & window.quizTargetPokemon を不可視化
 
@@ -1615,6 +1736,7 @@ function startQuiz(mode) {
     document.getElementById('quiz-result-screen').classList.add('hidden');
 
     renderQuizHearts();
+    updateQuizCryHintState();
     const input = document.getElementById('quiz-guess-input');
     input.value = '';
     closeQuizFormSelectionPanel();
@@ -1953,10 +2075,10 @@ function handleQuizInputSuggestion() {
         const matched = findPokemonByQuery(rawVal);
 
         if (matched) {
-            const { forms, sameStats } = findFormsAndSameStats(matched);
-            // 別の姿が2つ以上ある、または同種族値ポケモンが存在する場合にパネルを表示
-            if (forms.length > 1 || sameStats.length > 0) {
-                renderQuizFormSelectionPanel(matched, forms, sameStats);
+            const { forms } = findFormsAndSameStats(matched);
+            // 別の姿（メガシンカやリージョンフォームなど）が2つ以上ある場合のみパネルを表示（※同種族値ポケモンは表示しない）
+            if (forms.length > 1) {
+                renderQuizFormSelectionPanel(matched, forms);
                 return;
             }
         }
@@ -1972,13 +2094,13 @@ function closeQuizFormSelectionPanel() {
     }
 }
 
-function renderQuizFormSelectionPanel(matched, forms, sameStats) {
+function renderQuizFormSelectionPanel(matched, forms) {
     const panel = document.getElementById('quiz-form-selection-panel');
     if (!panel) return;
 
     panel.classList.remove('hidden');
 
-    function renderPokemonCard(p, isSameStatBadge = false) {
+    function renderPokemonCard(p) {
         const badge = getFormBadgeHtml(p);
         const isGuessed = quizGuessedList.some(g => g.id === p.id);
         const disabledClass = isGuessed ? 'opacity-50 cursor-not-allowed bg-slate-100' : 'bg-white hover:bg-rose-50/80 hover:border-rose-300 cursor-pointer hover:shadow-xs active:scale-98';
@@ -1994,12 +2116,11 @@ function renderQuizFormSelectionPanel(matched, forms, sameStats) {
                 ${isGuessed ? 'disabled' : `onclick="selectQuizPokemonToSubmit(${p.id})"`}
                 class="p-2.5 rounded-2xl border border-slate-200 ${disabledClass} transition-all flex items-center justify-between gap-2.5 text-left w-full group">
                 <div class="flex items-center gap-2.5 min-w-0">
-                    <img src="${p.image}" class="w-11 h-11 object-contain drop-shadow-xs flex-shrink-0" onerror="this.src='https://placehold.co/44x44/f1f5f9/94a3b8?text=?'">
+                    <img src="${p.image || POKEBALL_FALLBACK_SVG}" class="w-11 h-11 object-contain drop-shadow-xs flex-shrink-0" onerror="handlePokemonImageError(this, ${p.baseId || p.id})">
                     <div class="min-w-0 flex flex-col gap-1">
                         <div class="flex items-center gap-1.5 flex-wrap">
                             <span class="text-xs sm:text-sm font-black text-slate-900 group-hover:text-rose-600 truncate">${p.name}</span>
                             ${badge}
-                            ${isSameStatBadge ? '<span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">同値</span>' : ''}
                         </div>
                         <div class="flex items-center gap-1.5 flex-wrap">
                             <span class="text-[10px] font-bold text-slate-400">#${displayId}</span>
@@ -2023,22 +2144,7 @@ function renderQuizFormSelectionPanel(matched, forms, sameStats) {
                     <span>別の姿・関連フォルム一覧 (タップして回答)</span>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    ${forms.map(p => renderPokemonCard(p, false)).join('')}
-                </div>
-            </div>
-        `;
-    }
-
-    let sameStatsHtml = '';
-    if (sameStats.length > 0) {
-        sameStatsHtml = `
-            <div class="flex flex-col gap-2 pt-2 border-t border-slate-100">
-                <div class="text-[11px] font-black text-amber-700 uppercase tracking-wider flex items-center gap-1.5 px-1">
-                    <i class="fa-solid fa-equals text-amber-500"></i>
-                    <span>同じ種族値のポケモン (メロディ完全同一・どちらも正解)</span>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    ${sameStats.map(p => renderPokemonCard(p, true)).join('')}
+                    ${forms.map(p => renderPokemonCard(p)).join('')}
                 </div>
             </div>
         `;
@@ -2049,14 +2155,13 @@ function renderQuizFormSelectionPanel(matched, forms, sameStats) {
             <div class="flex items-center justify-between text-xs font-bold text-slate-700 px-1">
                 <span class="flex items-center gap-1.5 text-slate-900 font-black">
                     <i class="fa-solid fa-lightbulb text-amber-500"></i>
-                    <span>「${matched.name}」の選択肢一覧：</span>
+                    <span>「${matched.name}」のフォルム選択：</span>
                 </span>
                 <button type="button" onclick="closeQuizFormSelectionPanel()" class="text-slate-400 hover:text-slate-600 text-xs px-1 cursor-pointer">
                     <i class="fa-solid fa-xmark"></i> 閉じる
                 </button>
             </div>
             ${formsHtml}
-            ${sameStatsHtml}
         </div>
     `;
 }
@@ -2110,6 +2215,11 @@ function processQuizAnswer(found) {
     quizGuessedList.unshift(found);
     renderQuizHearts();
     renderQuizHistory();
+    updateQuizCryHintState();
+
+    if (quizGuessedList.length === 5) {
+        showSecurityToast('💡 5問ミスにより「正解の鳴き声ヒント」が解放されました！');
+    }
 
     triggerQuizWave(2.4);
     playStatMelody(found);
@@ -2135,16 +2245,16 @@ function handleQuizSubmit(e) {
         return;
     }
 
-    // もし別の姿または同種族値ポケモンが存在する場合、パネルを表示してユーザーが選択できるように促す
-    const { forms, sameStats } = findFormsAndSameStats(found);
+    // もし別の姿が存在する場合、パネルを表示してユーザーが選択できるように促す
+    const { forms } = findFormsAndSameStats(found);
     const panel = document.getElementById('quiz-form-selection-panel');
     const isPanelOpen = panel && !panel.classList.contains('hidden');
 
-    // パネルがまだ開いておらず、かつ複数の姿や同種族値がある場合はパネルを展開して案内
+    // パネルがまだ開いておらず、かつ複数の姿がある場合はパネルを展開して案内
     // ※ただしユーザーが「メガリザードンX」のように完全に姿を指定して入力した場合はそのまま回答へ進む
     const isSpecificFormName = found.formType !== 'normal' && found.name !== (found._baseSpeciesName || '');
-    if ((forms.length > 1 || sameStats.length > 0) && !isPanelOpen && !isSpecificFormName) {
-        renderQuizFormSelectionPanel(found, forms, sameStats);
+    if (forms.length > 1 && !isPanelOpen && !isSpecificFormName) {
+        renderQuizFormSelectionPanel(found, forms);
         return;
     }
 
@@ -2192,7 +2302,7 @@ function renderQuizHistory() {
                         <span class="text-[10px] font-black tracking-wider text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">
                             #${quizGuessedList.length - idx} 不正解
                         </span>
-                        <img src="${p.image}" class="w-10 h-10 object-contain drop-shadow-sm" onerror="this.src='https://placehold.co/40x40/f1f5f9/94a3b8?text=?'">
+                        <img src="${p.image || POKEBALL_FALLBACK_SVG}" class="w-10 h-10 object-contain drop-shadow-sm" onerror="handlePokemonImageError(this, ${p.baseId || p.id})">
                         <div class="flex items-center gap-1.5 flex-wrap">
                             <span class="text-xs text-slate-400 font-bold">#${displayId}</span>
                             <span class="text-sm font-black text-slate-900">${p.name}</span>
@@ -2318,8 +2428,8 @@ function finishQuiz(isWin, answeredPokemon = null, isSameStatsVariant = false, i
 
     card.innerHTML = `
         <div class="relative mx-auto sm:mx-0 flex-shrink-0">
-            <div class="w-32 h-32 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-200 p-2 shadow-inner">
-                <img src="${p.image}" alt="${p.name}" class="w-28 h-28 object-contain drop-shadow" onerror="this.src='https://placehold.co/120x120/f8fafc/94a3b8?text=?'">
+            <div class="w-32 h-32 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200/90 flex items-center justify-center border border-slate-300/80 p-2 shadow-inner">
+                <img src="${p.image || POKEBALL_FALLBACK_SVG}" alt="${p.name}" class="w-28 h-28 object-contain drop-shadow" onerror="handlePokemonImageError(this, ${p.baseId || p.id})">
             </div>
         </div>
         <div class="flex flex-col gap-2 flex-grow w-full">
